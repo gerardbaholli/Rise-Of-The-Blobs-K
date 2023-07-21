@@ -25,7 +25,7 @@ public class BaseBullet : MonoBehaviour, IGridObject
         transform.DOScale(1f, 1f);
     }
 
-    // TODO dont work, fix it
+    // TODO: fix animation
     public void TriggerDestroyAnimation()
     {
         float scaleDuration = 5f;
@@ -52,15 +52,15 @@ public class BaseBullet : MonoBehaviour, IGridObject
     private void GameManager_OnActiveColumnChanged(object sender, System.EventArgs e)
     {
         GridColumn activeGridColumn = gameManager.GetActiveGridColumn();
-        GridCell[] gridCellsArray = activeGridColumn.GetGridCellsArray();
+        GridCell[] gridCellArray = activeGridColumn.GetGridCellsArray();
 
         int cellIndex = currentGridCell.GetCellIndex();
 
         currentGridCell.SetGridObject(null);
-        gridCellsArray[cellIndex].SetGridObject(this);
-        currentGridCell = gridCellsArray[cellIndex];
+        gridCellArray[cellIndex].SetGridObject(this);
+        currentGridCell = gridCellArray[cellIndex];
 
-        Transform newTransform = gridCellsArray[cellIndex].GetGridCellTransform();
+        Transform newTransform = gridCellArray[cellIndex].GetGridCellTransform();
 
         transform.position = newTransform.position;
         transform.rotation = newTransform.rotation;
@@ -68,8 +68,25 @@ public class BaseBullet : MonoBehaviour, IGridObject
 
     private void GameManager_OnNextStep(object sender, System.EventArgs e)
     {
-        GridColumn currentGridColumn = currentGridCell.GetGridCellColumn();
-        GridCell[] gridCellsArray = gameManager.GetActiveGridColumn().GetGridCellsArray();
+        GridColumn gridColumn = currentGridCell.GetGridCellColumn();
+        GridCell[] gridCellArray = gridColumn.GetGridCellsArray();
+        int nextIndex = currentGridCell.GetCellIndex() - 1;
+        GridCell nextGridCell = gridCellArray[nextIndex];
+
+        if (nextGridCell.GetGridObject() is BaseBlob)
+        {
+            Debug.Log("Collision");
+        }
+        else
+        {
+            Transform newTransform = nextGridCell.GetGridCellTransform();
+
+            transform.DOMove(newTransform.position, gameManager.GetStepValue());
+
+            currentGridCell.SetGridObject(null);
+            gridCellArray[nextIndex].SetGridObject(this);
+            currentGridCell = nextGridCell;
+        }
     }
 
     public void SetBulletGridCell(GridCell gridCell)

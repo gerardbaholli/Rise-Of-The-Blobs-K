@@ -114,7 +114,9 @@ public class GridSystem : MonoRegistrable
 
             for (int y = height - 1; y > 0; y--)
             {
-                if (gridCellArray[y - 1].GetGridObject() == null)
+                if (gridCellArray[y - 1].GetGridObject() == null || 
+                    gridCellArray[y].GetGridObject() is BaseBullet || 
+                    gridCellArray[y-1].GetGridObject() is BaseBullet)
                     continue;
 
                 BaseBlob prevBlob = gridCellArray[y - 1].GetGridObject() as BaseBlob;
