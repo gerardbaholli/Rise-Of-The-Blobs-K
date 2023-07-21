@@ -61,9 +61,6 @@ public class BaseBullet : MonoBehaviour, IGridObject
         currentGridCell = gridCellsArray[cellIndex];
 
         Transform newTransform = gridCellsArray[cellIndex].GetGridCellTransform();
-        Debug.Log(cellIndex);
-        Debug.Log(transform.position.ToString());
-        Debug.Log(newTransform.position.ToString());
 
         transform.position = newTransform.position;
         transform.rotation = newTransform.rotation;

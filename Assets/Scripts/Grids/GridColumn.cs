@@ -4,30 +4,22 @@ using UnityEngine;
 
 public class GridColumn
 {
+    private int columnIndex;
+    private int columnHeight;
     private GridCell[] gridCellArray;
-
-    private GridColumn prevGridColumn;
-    private GridColumn nextGridColumn;
-
     private Transform gridColumnTransform;
 
-    private GameManager gameManager;
 
-    public GridColumn(GridCell[] gridCellArray)
+    public GridColumn(int columnIndex, int columnHeight)
     {
-        this.gridCellArray = gridCellArray;
+        this.columnIndex = columnIndex;
+        this.columnHeight = columnHeight;
 
-        gameManager = ServiceLocator.Get<GameManager>();
-        gameManager.OnActiveColumnChanged += GameManager_OnActiveColumnChanged;
-    }
+        gridCellArray = new GridCell[columnHeight];
 
-    private void GameManager_OnActiveColumnChanged(object sender, EventArgs e)
-    {
-        if (gameManager.GetActiveGridColumn() == this)
+        for (int y = 0; y < columnHeight; y++)
         {
-            //Debug.Log(gridColumnTransform.position);
-            
-            // TODO: activate visual update for the column
+            gridCellArray[y] = new GridCell(y);
         }
     }
 
@@ -39,26 +31,6 @@ public class GridColumn
     public Transform GetGridColumnTransform()
     {
         return gridColumnTransform;
-    }
-
-    public void SetPrevGridColumn(GridColumn prevGridColumn)
-    {
-        this.prevGridColumn = prevGridColumn;
-    }
-
-    public void SetNextGridColumn(GridColumn nextGridColumn)
-    {
-        this.nextGridColumn = nextGridColumn;
-    }
-
-    public GridColumn GetPrevGridColumn()
-    {
-        return prevGridColumn;
-    }
-
-    public GridColumn GetNextGridColumn()
-    {
-        return nextGridColumn;
     }
 
     public GridCell[] GetGridCellsArray()

@@ -23,45 +23,16 @@ public class GridSystem : MonoRegistrable
 
     private void Start()
     {
-        InitGridSystemArray();
+        InitGridSystem();
     }
 
-    private void Update()
-    {
-        //if (Input.GetKeyDown(KeyCode.Space))
-        //{
-        //    for (int x = 0; x < width; x++)
-        //    {
-        //        GridCell[] gridCellArray = gridColumnArray[x].GetGridCellsArray();
-
-        //        for (int y = 0; y < height; y++)
-        //        {
-        //            if (y < 4)
-        //            {
-        //                Destroy(gridCellArray[y].GetBlob().gameObject);
-        //                Debug.Log(gridCellArray[y].GetBlob().gameObject);
-        //            }
-        //        }
-        //    }
-        //}
-
-        //CompactGrid();
-    }
-
-    private void InitGridSystemArray()
+    private void InitGridSystem()
     {
         gridColumnArray = new GridColumn[width];
 
         for (int x = 0; x < width; x++)
         {
-            GridCell[] gridCellArray = new GridCell[height];
-
-            for (int y = 0; y < height; y++)
-            {
-                gridCellArray[y] = new GridCell(y);
-            }
-
-            GridColumn gridColumn = new GridColumn(gridCellArray);
+            GridColumn gridColumn = new GridColumn(x, height);
             gridColumnArray[x] = gridColumn;
         }
 
@@ -166,6 +137,7 @@ public class GridSystem : MonoRegistrable
         return gridColumnArray;
     }
 
+    // To use when a piece is destroyed
     public void CompactGrid()
     {
         for (int x = 0; x < width; x++)
