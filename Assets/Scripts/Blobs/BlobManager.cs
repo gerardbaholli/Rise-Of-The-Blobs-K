@@ -36,7 +36,6 @@ public class BlobManager : MonoRegistrable
             gridSystem.SpawnNewRow(blobListSO.blobList);
             stepCounter = 0;
         }
-        
     }
 
 }

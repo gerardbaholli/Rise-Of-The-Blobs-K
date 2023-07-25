@@ -5,5 +5,5 @@ using UnityEngine;
 //[CreateAssetMenu()]
 public class ColoredMaterialListSO : ScriptableObject
 {
-    public List<Material> coloredBlobMaterialList;
+    public List<Material> coloredMaterialList;
 }

@@ -165,7 +165,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   blobListSO: {fileID: 11400000, guid: 97aa699d13866be40b77a0513216d1f8, type: 2}
-  stepsRequiredToSpawnBlobs: 2
+  stepsRequiredToSpawnBlobs: 8
 --- !u!1 &133305574
 GameObject:
   m_ObjectHideFlags: 0
@@ -260,6 +260,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a8aaa92faca3a1745a84292363e77bd4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  virtualCamera: {fileID: 1929201854}
 --- !u!1 &320587516
 GameObject:
   m_ObjectHideFlags: 3

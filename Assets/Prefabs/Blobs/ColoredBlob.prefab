@@ -102,5 +102,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   blobVisual: {fileID: 2470918731598982809}
-  coloredBlobMaterialListSO: {fileID: 11400000, guid: 373dbbc7527f3cd4887127a0960f2ff8,
+  coloredMaterialListSO: {fileID: 11400000, guid: 373dbbc7527f3cd4887127a0960f2ff8,
     type: 2}

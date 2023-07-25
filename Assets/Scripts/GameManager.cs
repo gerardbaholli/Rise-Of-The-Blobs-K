@@ -10,11 +10,11 @@ public class GameManager : MonoRegistrable
 
     private GridSystem gridSystem;
 
-    private CinemachineVirtualCamera virtualCamera;
+    [SerializeField] private CinemachineVirtualCamera virtualCamera;
 
     private GridColumn currentActiveColumn;
 
-    private float stepTimerMax = 1f;
+    private float stepTimerMax = 0.5f;
     private float stepTimer;
 
     private float updateActiveColumnTimerMax = 0.1f;
@@ -27,7 +27,7 @@ public class GameManager : MonoRegistrable
 
     private void Start()
     {
-        virtualCamera = FindFirstObjectByType<CinemachineVirtualCamera>();
+        //virtualCamera = FindFirstObjectByType<CinemachineVirtualCamera>();
         gridSystem = ServiceLocator.Get<GridSystem>();
 
         UpdateActiveColumn();

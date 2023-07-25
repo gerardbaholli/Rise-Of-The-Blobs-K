@@ -114,9 +114,9 @@ public class GridSystem : MonoRegistrable
 
             for (int y = height - 1; y > 0; y--)
             {
-                if (gridCellArray[y - 1].GetGridObject() == null || 
-                    gridCellArray[y].GetGridObject() is BaseBullet || 
-                    gridCellArray[y-1].GetGridObject() is BaseBullet)
+                if (gridCellArray[y - 1].GetGridObject() == null ||
+                    gridCellArray[y].GetGridObject() is BaseBullet ||
+                    gridCellArray[y - 1].GetGridObject() is BaseBullet)
                     continue;
 
                 BaseBlob prevBlob = gridCellArray[y - 1].GetGridObject() as BaseBlob;
@@ -124,6 +124,8 @@ public class GridSystem : MonoRegistrable
 
                 gridCellArray[y - 1].SetGridObject(null);
                 gridCellArray[y].SetGridObject(prevBlob);
+
+                prevBlob.SetGridCell(gridCellArray[y]);
 
                 if (gridCellArray[y].GetGridObject() != null)
                 {
@@ -139,7 +141,6 @@ public class GridSystem : MonoRegistrable
         return gridColumnArray;
     }
 
-    // To use when a piece is destroyed
     public void CompactGrid()
     {
         for (int x = 0; x < width; x++)
@@ -160,7 +161,7 @@ public class GridSystem : MonoRegistrable
                 if (gridObject is BaseBullet)
                 {
                     break;
-                } 
+                }
 
                 if (count == 0)
                 {
@@ -178,6 +179,130 @@ public class GridSystem : MonoRegistrable
                 count = 0;
             }
         }
+    }
+
+    public GridCell GetGridCell(GridColumn gridColumn, int index)
+    {
+        GridCell[] gridCellArray = gridColumn.GetGridCellsArray();
+        return gridCellArray[index];
+    }
+
+    public GridCell GetUpGridCell(GridCell gridCell)
+    {
+        if (gridCell!= null)
+        {
+            GridColumn gridColumn = gridCell.GetGridCellColumn();
+            int gridCellIndex = gridCell.GetCellIndex();
+
+            if (gridCellIndex != height - 1 && gridColumn != null)
+            {
+                return gridColumn.GetGridCellsArray()[gridCellIndex + 1];
+            }
+        }
+
+        return null;
+    }
+
+    public GridCell GetDownGridCell(GridCell gridCell)
+    {
+        if (gridCell != null)
+        {
+            GridColumn gridColumn = gridCell.GetGridCellColumn();
+            int gridCellIndex = gridCell.GetCellIndex();
+
+            if (gridCellIndex != 0 && gridColumn != null)
+            {
+                return gridColumn.GetGridCellsArray()[gridCellIndex - 1];
+            }
+        }
+
+        return null;
+    }
+
+    public GridCell GetLeftGridCell(GridCell gridCell)
+    {
+        if (gridCell != null)
+        {
+            GridColumn gridColumn = gridCell.GetGridCellColumn();
+            GridColumn leftGridColumn = GetPrevColumn(gridColumn);
+
+            int gridCellIndex = gridCell.GetCellIndex();
+
+            if (leftGridColumn != null)
+            {
+                return leftGridColumn.GetGridCellsArray()[gridCellIndex];
+            }
+        }
+
+        return null;
+    }
+
+    public GridCell GetRightGridCell(GridCell gridCell)
+    {
+        if (gridCell != null)
+        {
+            GridColumn gridColumn = gridCell.GetGridCellColumn();
+            GridColumn rightGridColumn = GetNextColumn(gridColumn);
+
+            int gridCellIndex = gridCell.GetCellIndex();
+
+            if (rightGridColumn != null)
+            {
+                return rightGridColumn.GetGridCellsArray()[gridCellIndex];
+            }
+        }
+
+        return null;
+    }
+
+    private GridColumn GetPrevColumn(GridColumn gridColumn)
+    {
+        int prevIndex;
+
+        for (int i = 0; i < gridColumnArray.Length; i++)
+        {
+            if (gridColumnArray[i] == gridColumn)
+            {
+
+                if (i != 0)
+                {
+                    prevIndex = i - 1;
+                }
+                else
+                {
+                    prevIndex = gridColumnArray.Length - 1;
+                }
+
+                return gridColumnArray[prevIndex];
+            }
+        }
+
+        return null;
+    }
+
+    private GridColumn GetNextColumn(GridColumn gridColumn)
+    {
+        int nextIndex;
+
+        for (int i = 0; i < gridColumnArray.Length; i++)
+        {
+            if (gridColumnArray[i] == gridColumn)
+            {
+
+                if (i < gridColumnArray.Length - 1)
+                {
+                    nextIndex = i + 1;
+                }
+                else
+                {
+                    nextIndex = 0;
+                }
+
+                return gridColumnArray[nextIndex];
+            }
+        }
+
+        return null;
     }
 
 }

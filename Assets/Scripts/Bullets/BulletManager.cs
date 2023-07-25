@@ -22,7 +22,7 @@ public class BulletManager : MonoRegistrable
         gameManager = ServiceLocator.Get<GameManager>();
     }
 
-    private void Update()
+    private void LateUpdate()
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
@@ -44,7 +44,7 @@ public class BulletManager : MonoRegistrable
         newBullet.TriggerSpawnAnimation();
 
         gridCellsArray[index].SetGridObject(newBullet);
-        newBullet.SetBulletGridCell(gridCellsArray[index]);
+        newBullet.SetGridCell(gridCellsArray[index]);
     }
 
 }
