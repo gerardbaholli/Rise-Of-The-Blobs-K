@@ -7,18 +7,28 @@ public class Test : MonoBehaviour
     private GridSystem gridSystem;
     private GameManager gameManager;
 
-    private GridColumn[] gridColumnArray;
+    private GridCell[,] gridCellArray;
 
     private void Start()
     {
         gridSystem = ServiceLocator.Get<GridSystem>();
         gameManager = ServiceLocator.Get<GameManager>();
 
-        gridColumnArray = gridSystem.GetGridColumnArray();
-        gameManager.OnNextStep += GameManager_OnNextStep;
+        gridCellArray = gridSystem.GetCellArray();
+        //gameManager.OnNextStep += GameManager_OnNextStep;
+    }
+
+    private void FixedUpdate()
+    {
+        //DebugMethod();
     }
 
     private void GameManager_OnNextStep(object sender, System.EventArgs e)
+    {
+        DebugMethod();
+    }
+
+    private void DebugMethod()
     {
         string message = "";
 
@@ -26,8 +36,7 @@ public class Test : MonoBehaviour
         {
             for (int x = 0; x < 20; x++)
             {
-                GridCell[] gridCellArray = gridColumnArray[x].GetGridCellsArray();
-                IGridObject gridObject = gridCellArray[y].GetGridObject();
+                IGridObject gridObject = gridCellArray[x, y].GetGridObject();
 
                 if (gridObject is BaseBullet)
                 {

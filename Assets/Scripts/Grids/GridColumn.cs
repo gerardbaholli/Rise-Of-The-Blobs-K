@@ -19,7 +19,7 @@ public class GridColumn
 
         for (int y = 0; y < columnHeight; y++)
         {
-            gridCellArray[y] = new GridCell(y);
+            //gridCellArray[y] = new GridCell(y);
         }
     }
 

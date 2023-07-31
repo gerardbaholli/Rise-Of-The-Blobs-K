@@ -195,12 +195,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fdc32a7ffa2980c4aacfd357e3c80247, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  columnTransform: {fileID: 6429111107466941743, guid: 48eeb5469424b6744bb80c386f697978,
-    type: 3}
-  cellTransform: {fileID: 4366289299572374861, guid: 0c8689d5ac1816c4e8f0c1ebab6fdd4e,
-    type: 3}
-  width: 20
-  height: 13
 --- !u!4 &133305576
 Transform:
   m_ObjectHideFlags: 0
@@ -843,7 +837,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &942053143
 Transform:
   m_ObjectHideFlags: 0

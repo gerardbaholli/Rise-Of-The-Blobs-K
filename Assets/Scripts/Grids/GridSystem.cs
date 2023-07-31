@@ -6,15 +6,12 @@ using UnityEngine;
 public class GridSystem : MonoRegistrable
 {
 
-    [SerializeField] private Transform columnTransform;
-    [SerializeField] private Transform cellTransform;
-
-    [SerializeField] private int width = 20;
-    [SerializeField] private int height = 13;
+    [SerializeField] public int Width { get; private set; } = 20;
+    [SerializeField] public int Height { get; private set; } = 13;
 
     private float range = 4f;
 
-    private GridColumn[] gridColumnArray;
+    private GridCell[,] gridCellArray;
 
     private void Awake()
     {
@@ -28,31 +25,37 @@ public class GridSystem : MonoRegistrable
 
     private void InitGridSystem()
     {
-        gridColumnArray = new GridColumn[width];
+        gridCellArray = new GridCell[Width, Height];
 
-        for (int x = 0; x < width; x++)
+        float angleOffset = 360f / Width;
+
+        for (int x = 0; x < Width; x++)
         {
-            GridColumn gridColumn = new GridColumn(x, height);
-            gridColumnArray[x] = gridColumn;
-        }
+            float angle = x * angleOffset;
+            Vector3 columnPosition = ComputePosition(angle);
+            Vector3 columnVersor = ComputeVersor(columnPosition);
 
-        InitColumnTransform();
-        InitCellTransform();
-    }
+            GameObject column = new GameObject("Column " + x);
+            column.transform.position = columnPosition;
+            column.transform.rotation = Quaternion.LookRotation(columnVersor);
 
-    private void InitColumnTransform()
-    {
-        float angleOffset = 360f / width;
+            Transform columnTransform = column.transform;
+            columnTransform.parent = transform;
 
-        for (int i = 0; i < width; i++)
-        {
-            float angle = i * angleOffset;
-            Vector3 position = ComputePosition(angle);
-            Vector3 versor = ComputeVersor(position);
+            for (int y = 0; y < Height; y++)
+            {
+                Vector3 cellPosition = new Vector3(columnTransform.position.x, y, columnTransform.position.z);
+                Quaternion cellRotation = columnTransform.rotation;
 
-            Transform columnSpawner = Instantiate(columnTransform, position, Quaternion.LookRotation(versor));
-            columnSpawner.parent = this.transform;
-            gridColumnArray[i].SetGridColumnTransform(columnSpawner);
+                GameObject cell = new GameObject("Cell " + y);
+                cell.transform.position = cellPosition;
+                cell.transform.rotation = cellRotation;
+
+                Transform cellTransform = cell.transform;
+                cellTransform.parent = columnTransform.transform;
+
+                gridCellArray[x, y] = new GridCell(cellTransform, x, y);
+            }
         }
     }
 
@@ -69,23 +72,18 @@ public class GridSystem : MonoRegistrable
         return (position - Vector3.zero).normalized;
     }
 
-    private void InitCellTransform()
+    public void SpawnFirstRow(List<BaseBlob> blobList)
     {
-        for (int x = 0; x < width; x++)
+        for (int x = 0; x < Width; x++)
         {
-            Transform gridColumnTransform = gridColumnArray[x].GetGridColumnTransform();
-            GridCell[] gridCellArray = gridColumnArray[x].GetGridCellsArray();
+            BaseBlob blob = Instantiate(GenerateRandomBlob(blobList), gridCellArray[x, 0].GetCellTransform());
 
-            for (int y = 0; y < height; y++)
-            {
-                Vector3 cellPosition = new Vector3(gridColumnTransform.position.x, y, gridColumnTransform.position.z);
-                Quaternion cellRotation = gridColumnTransform.rotation;
+            // DoTween
+            Transform blobTransform = blob.transform;
+            blobTransform.localScale = Vector3.zero;
+            blobTransform.DOScale(1f, 1f);
 
-                Transform cellTransform = Instantiate(this.cellTransform, cellPosition, cellRotation);
-                cellTransform.parent = gridColumnTransform.transform;
-                gridCellArray[y].SetGridCellTransform(cellTransform);
-                gridCellArray[y].SetGridCellColumn(gridColumnArray[x]);
-            }
+            gridCellArray[x, 0].SetGridObject(blob);
         }
     }
 
@@ -93,111 +91,137 @@ public class GridSystem : MonoRegistrable
     {
         MoveAllRowsUp();
 
-        for (int x = 0; x < width; x++)
+        for (int x = 0; x < Width; x++)
         {
-            GridCell[] gridCellArray = gridColumnArray[x].GetGridCellsArray();
+            BaseBlob blob = Instantiate(GenerateRandomBlob(blobList), gridCellArray[x, 0].GetCellTransform());
 
-            int randomIndex = Random.Range(0, blobList.Count);
-            BaseBlob blobToSpawn = blobList[randomIndex];
-            BaseBlob newBlob = Instantiate(blobToSpawn, gridCellArray[0].GetGridCellTransform());
-            newBlob.transform.localScale = Vector3.zero;
-            newBlob.transform.DOScale(1f, 1f);
-            gridCellArray[0].SetGridObject(newBlob);
+            // DoTween
+            Transform blobTransform = blob.transform;
+            blobTransform.localScale = Vector3.zero;
+            blobTransform.DOScale(1f, 1f);
+
+            gridCellArray[x, 0].SetGridObject(blob);
         }
+    }
+
+    private BaseBlob GenerateRandomBlob(List<BaseBlob> blobList)
+    {
+        int randomIndex = Random.Range(0, blobList.Count);
+        BaseBlob blobGenerated = blobList[randomIndex];
+        return blobGenerated;
     }
 
     private void MoveAllRowsUp()
     {
-        for (int x = 0; x < width; x++)
+        for (int x = 0; x < Width; x++)
         {
-            GridCell[] gridCellArray = gridColumnArray[x].GetGridCellsArray();
-
-            for (int y = height - 1; y > 0; y--)
+            for (int y = Height - 1; y > 0; y--)
             {
-                if (gridCellArray[y - 1].GetGridObject() == null ||
-                    gridCellArray[y].GetGridObject() is BaseBullet ||
-                    gridCellArray[y - 1].GetGridObject() is BaseBullet)
+                if (gridCellArray[x, y - 1].GetGridObject() == null ||
+                    gridCellArray[x, y].GetGridObject() is BaseBullet ||
+                    gridCellArray[x, y - 1].GetGridObject() is BaseBullet)
                     continue;
 
-                BaseBlob prevBlob = gridCellArray[y - 1].GetGridObject() as BaseBlob;
-                prevBlob.transform.parent = gridCellArray[y].GetGridCellTransform();
+                BaseBlob downBlob = gridCellArray[x, y - 1].GetGridObject() as BaseBlob;
+                downBlob.transform.parent = gridCellArray[x, y].GetCellTransform();
 
-                gridCellArray[y - 1].SetGridObject(null);
-                gridCellArray[y].SetGridObject(prevBlob);
+                gridCellArray[x, y - 1].SetGridObject(null);
+                gridCellArray[x, y].SetGridObject(downBlob);
 
-                prevBlob.SetGridCell(gridCellArray[y]);
+                downBlob.SetGridCell(gridCellArray[x, y]);
 
-                if (gridCellArray[y].GetGridObject() != null)
+                if (gridCellArray[x, y].GetGridObject() != null)
                 {
-                    Vector3 endPosition = gridCellArray[y].GetGridCellTransform().position;
-                    prevBlob.gameObject.transform.DOMove(endPosition, 1f).SetEase(Ease.InOutCirc);
+                    Vector3 endPosition = gridCellArray[x, y].GetCellTransform().position;
+
+                    // DoTween
+                    downBlob.gameObject.transform.DOMove(endPosition, 1f).SetEase(Ease.InOutCirc);
                 }
             }
         }
     }
 
-    public GridColumn[] GetGridColumnArray()
+    public GridCell[,] GetCellArray()
     {
-        return gridColumnArray;
+        return gridCellArray;
     }
 
-    public void CompactGrid()
+    public GridCell GetGridCell(Transform cellTransform)
     {
-        for (int x = 0; x < width; x++)
+        for (int x = 0; x < Width; x++)
         {
-            GridCell[] gridCellArray = gridColumnArray[x].GetGridCellsArray();
-            int count = 0;
-
-            for (int y = 0; y < height; y++)
+            for (int y = 0; y < Height; y++)
             {
-                IGridObject gridObject = gridCellArray[y].GetGridObject();
-
-                if (gridObject == null)
-                {
-                    count++;
-                    continue;
-                }
-
-                if (gridObject is BaseBullet)
-                {
-                    break;
-                }
-
-                if (count == 0)
-                {
-                    continue;
-                }
-
-                BaseBlob blob = gridCellArray[y].GetGridObject() as BaseBlob;
-                gridCellArray[y - count].SetGridObject(blob);
-                gridCellArray[y].SetGridObject(null);
-
-                Vector3 movePosition = gridCellArray[y - count].GetGridCellTransform().position;
-                blob.gameObject.transform.DOMove(movePosition, 1f).SetEase(Ease.InOutCirc); //.OnComplete(() => isLocked = false);
-
-                y -= count;
-                count = 0;
+                if (gridCellArray[x, y].GetCellTransform() == cellTransform)
+                    return gridCellArray[x, y];
             }
         }
+
+        return null;
     }
 
-    public GridCell GetGridCell(GridColumn gridColumn, int index)
+    public GridCell GetGridCell(Vector3 cellPosition)
     {
-        GridCell[] gridCellArray = gridColumn.GetGridCellsArray();
-        return gridCellArray[index];
+        for (int x = 0; x < Width; x++)
+        {
+            for (int y = 0; y < Height; y++)
+            {
+                if (gridCellArray[x, y].GetCellTransform().position == cellPosition)
+                    return gridCellArray[x, y];
+            }
+        }
+
+        return null;
     }
+
+    //public void CompactGrid()
+    //{
+    //    for (int x = 0; x < width; x++)
+    //    {
+    //        int count = 0;
+
+    //        for (int y = 0; y < height; y++)
+    //        {
+    //            IGridObject gridObject = gridCellArray[x, y].GetGridObject();
+
+    //            if (gridObject == null)
+    //            {
+    //                count++;
+    //                continue;
+    //            }
+
+    //            if (gridObject is BaseBullet)
+    //            {
+    //                break;
+    //            }
+
+    //            if (count == 0)
+    //            {
+    //                continue;
+    //            }
+
+    //            BaseBlob blob = gridCellArray[x, y].GetGridObject() as BaseBlob;
+    //            gridCellArray[x, y - count].SetGridObject(blob);
+    //            gridCellArray[x, y].SetGridObject(null);
+
+    //            Vector3 movePosition = gridCellArray[x, y - count].GetCellTransform().position;
+    //            blob.gameObject.transform.DOMove(movePosition, 1f).SetEase(Ease.InOutCirc); //.OnComplete(() => isLocked = false);
+
+    //            y -= count;
+    //            count = 0;
+    //        }
+    //    }
+    //}
 
     public GridCell GetUpGridCell(GridCell gridCell)
     {
-        if (gridCell!= null)
+        if (gridCell != null)
         {
-            GridColumn gridColumn = gridCell.GetGridCellColumn();
-            int gridCellIndex = gridCell.GetCellIndex();
+            int cellColumn = gridCell.GetColumn();
+            int cellRow = gridCell.GetRow();
 
-            if (gridCellIndex != height - 1 && gridColumn != null)
-            {
-                return gridColumn.GetGridCellsArray()[gridCellIndex + 1];
-            }
+            if (cellRow + 1 < Height)
+                return gridCellArray[cellColumn, cellRow + 1];
         }
 
         return null;
@@ -207,13 +231,11 @@ public class GridSystem : MonoRegistrable
     {
         if (gridCell != null)
         {
-            GridColumn gridColumn = gridCell.GetGridCellColumn();
-            int gridCellIndex = gridCell.GetCellIndex();
+            int cellColumn = gridCell.GetColumn();
+            int cellRow = gridCell.GetRow();
 
-            if (gridCellIndex != 0 && gridColumn != null)
-            {
-                return gridColumn.GetGridCellsArray()[gridCellIndex - 1];
-            }
+            if (cellRow - 1 > 0)
+                return gridCellArray[cellColumn, cellRow - 1];
         }
 
         return null;
@@ -223,15 +245,13 @@ public class GridSystem : MonoRegistrable
     {
         if (gridCell != null)
         {
-            GridColumn gridColumn = gridCell.GetGridCellColumn();
-            GridColumn leftGridColumn = GetPrevColumn(gridColumn);
+            int cellColumn = gridCell.GetColumn();
+            int cellRow = gridCell.GetRow();
 
-            int gridCellIndex = gridCell.GetCellIndex();
-
-            if (leftGridColumn != null)
-            {
-                return leftGridColumn.GetGridCellsArray()[gridCellIndex];
-            }
+            if (cellColumn - 1 < 0)
+                return gridCellArray[cellColumn - 1, cellRow];
+            else
+                return gridCellArray[Width - 1, cellRow];
         }
 
         return null;
@@ -241,68 +261,22 @@ public class GridSystem : MonoRegistrable
     {
         if (gridCell != null)
         {
-            GridColumn gridColumn = gridCell.GetGridCellColumn();
-            GridColumn rightGridColumn = GetNextColumn(gridColumn);
+            int cellColumn = gridCell.GetColumn();
+            int cellRow = gridCell.GetRow();
 
-            int gridCellIndex = gridCell.GetCellIndex();
-
-            if (rightGridColumn != null)
-            {
-                return rightGridColumn.GetGridCellsArray()[gridCellIndex];
-            }
+            if (cellColumn + 1 < Width)
+                return gridCellArray[cellColumn + 1, cellRow];
+            else
+                return gridCellArray[0, cellRow];
         }
 
         return null;
     }
 
-    private GridColumn GetPrevColumn(GridColumn gridColumn)
+    // TODO: 
+    public void SetObjectToGridCell(IGridObject gridObject)
     {
-        int prevIndex;
-
-        for (int i = 0; i < gridColumnArray.Length; i++)
-        {
-            if (gridColumnArray[i] == gridColumn)
-            {
-
-                if (i != 0)
-                {
-                    prevIndex = i - 1;
-                }
-                else
-                {
-                    prevIndex = gridColumnArray.Length - 1;
-                }
-
-                return gridColumnArray[prevIndex];
-            }
-        }
-
-        return null;
-    }
-
-    private GridColumn GetNextColumn(GridColumn gridColumn)
-    {
-        int nextIndex;
-
-        for (int i = 0; i < gridColumnArray.Length; i++)
-        {
-            if (gridColumnArray[i] == gridColumn)
-            {
-
-                if (i < gridColumnArray.Length - 1)
-                {
-                    nextIndex = i + 1;
-                }
-                else
-                {
-                    nextIndex = 0;
-                }
-
-                return gridColumnArray[nextIndex];
-            }
-        }
-
-        return null;
+        // Put object to grid cell + set new parent
     }
 
 }

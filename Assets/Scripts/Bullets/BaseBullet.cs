@@ -30,43 +30,22 @@ public class BaseBullet : MonoBehaviour, IGridObject
         transform.DOScale(1f, 1f);
     }
 
-    // TODO: fix animation
-    //public void TriggerDestroyAnimation()
-    //{
-    //    float scaleDuration = 5f;
-    //    float fadeDuration = 2f;
-    //    float finalAlpha = 0f;
-
-    //    transform.DOScale(new Vector3(2f, -1f, 2f), scaleDuration)
-    //            .SetEase(Ease.OutQuad)
-    //            .OnComplete(() =>
-    //            {
-    //                Debug.Log("DOScale completed");
-    //                Renderer objectRenderer = GetComponentInChildren<Renderer>();
-    //                Color currentColor = objectRenderer.material.color;
-    //                Color targetColor = new Color(currentColor.r, currentColor.g, currentColor.b, finalAlpha);
-    //                objectRenderer.material.DOColor(targetColor, fadeDuration)
-    //                .OnComplete(() =>
-    //                {
-    //                    Debug.Log("DOColor completed");
-    //                    //Destroy(gameObject);
-    //                });
-    //            });
-    //}
 
     protected void GameManager_OnActiveColumnChanged(object sender, EventArgs e)
     {
-        GridColumn activeGridColumn = gameManager.GetActiveGridColumn();
-        GridCell[] gridCellArray = activeGridColumn.GetGridCellsArray();
+        Transform activeColumn = gameManager.GetActiveColumnTransform();
+        Vector3 newPosition = new Vector3(activeColumn.position.x, transform.position.y, activeColumn.position.z);
+        GridCell newGridCell = gridSystem.GetGridCell(newPosition);
 
-        int cellIndex = currentGridCell.GetCellIndex();
+        GridCell[,] gridCellArray = gridSystem.GetCellArray();
+        int column = newGridCell.GetColumn();
+        int row = newGridCell.GetRow();
 
         currentGridCell.SetGridObject(null);
-        gridCellArray[cellIndex].SetGridObject(this);
-        currentGridCell = gridCellArray[cellIndex];
+        gridCellArray[column, row].SetGridObject(this);
+        currentGridCell = gridCellArray[column, row];
 
-        Transform newTransform = gridCellArray[cellIndex].GetGridCellTransform();
-
+        Transform newTransform = newGridCell.GetCellTransform();
         transform.position = newTransform.position;
         transform.rotation = newTransform.rotation;
     }
@@ -79,29 +58,39 @@ public class BaseBullet : MonoBehaviour, IGridObject
         }
         else
         {
-            GridColumn gridColumn = currentGridCell.GetGridCellColumn();
-            GridCell[] gridCellArray = gridColumn.GetGridCellsArray();
-            int nextIndex = currentGridCell.GetCellIndex() - 1;
-            GridCell nextGridCell = gridCellArray[nextIndex];
+            GridCell downGridCell = gridSystem.GetDownGridCell(currentGridCell);
 
-            if (nextGridCell.GetGridObject() is BaseBlob)
-            {
-                Collision(nextGridCell.GetGridObject() as BaseBlob);
-            }
-            else
-            {
-                Transform newTransform = nextGridCell.GetGridCellTransform();
 
-                //transform.DOMove(newTransform.position, gameManager.GetStepValue());
+            if (downGridCell != null)
+            {
+                currentGridCell.SetGridObject(null);
+                downGridCell.SetGridObject(this);
+                currentGridCell = downGridCell;
+
+                Transform newTransform = downGridCell.GetCellTransform();
                 transform.position = newTransform.position;
                 transform.rotation = newTransform.rotation;
-
-                Debug.Log("1 " + currentGridCell);
-                currentGridCell.SetGridObject(null);
-                gridCellArray[nextIndex].SetGridObject(this);
-                currentGridCell = nextGridCell;
-                Debug.Log("2 " + currentGridCell);
             }
+
+
+            //if (nextGridCell.GetGridObject() is BaseBlob)
+            //{
+            //    Collision(nextGridCell.GetGridObject() as BaseBlob);
+            //}
+            //else
+            //{
+            //    Transform newTransform = nextGridCell.GetGridCellTransform();
+
+            //    //transform.DOMove(newTransform.position, gameManager.GetStepValue());
+            //    transform.position = newTransform.position;
+            //    transform.rotation = newTransform.rotation;
+
+            //    Debug.Log("1 " + currentGridCell);
+            //    currentGridCell.SetGridObject(null);
+            //    gridCellArray[nextIndex].SetGridObject(this);
+            //    currentGridCell = nextGridCell;
+            //    Debug.Log("2 " + currentGridCell);
+            //}
             stepCounter = 0;
         }
     }

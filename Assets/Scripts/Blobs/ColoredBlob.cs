@@ -34,33 +34,33 @@ public class ColoredBlob : BaseBlob
         return blobColorMaterial;
     }
 
-    public override void DestroyBlob()
-    {
-        if (currentGridCell == null)
-        {
-            Debug.Log("3 " + currentGridCell);
-        }
+    //public override void DestroyBlob()
+    //{
+    //    if (currentGridCell == null)
+    //    {
+    //        Debug.Log("3 " + currentGridCell);
+    //    }
 
-        if (!hasToBeDestroyed)
-        {
-            hasToBeDestroyed = true;
+    //    if (!hasToBeDestroyed)
+    //    {
+    //        hasToBeDestroyed = true;
 
-            GridCell upGridCell = gridSystem.GetUpGridCell(currentGridCell);
-            GridCell downGridCell = gridSystem.GetDownGridCell(currentGridCell);
-            GridCell leftGridCell = gridSystem.GetLeftGridCell(currentGridCell);
-            GridCell rightGridCell = gridSystem.GetRightGridCell(currentGridCell);
+    //        GridCell upGridCell = gridSystem.GetUpGridCell(currentGridCell);
+    //        GridCell downGridCell = gridSystem.GetDownGridCell(currentGridCell);
+    //        GridCell leftGridCell = gridSystem.GetLeftGridCell(currentGridCell);
+    //        GridCell rightGridCell = gridSystem.GetRightGridCell(currentGridCell);
 
-            CheckColoredBlob(upGridCell);
-            CheckColoredBlob(downGridCell);
-            CheckColoredBlob(leftGridCell);
-            CheckColoredBlob(rightGridCell);
+    //        CheckColoredBlob(upGridCell);
+    //        CheckColoredBlob(downGridCell);
+    //        CheckColoredBlob(leftGridCell);
+    //        CheckColoredBlob(rightGridCell);
 
-            Debug.Log("4 " + currentGridCell);
+    //        Debug.Log("4 " + currentGridCell);
 
-            currentGridCell.SetGridObject(null);
-            Destroy(gameObject);
-        }
-    }
+    //        currentGridCell.SetGridObject(null);
+    //        Destroy(gameObject);
+    //    }
+    //}
 
     private void CheckColoredBlob(GridCell gridCell)
     {

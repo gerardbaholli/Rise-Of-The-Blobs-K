@@ -22,6 +22,7 @@ public class BlobManager : MonoRegistrable
         gridSystem = ServiceLocator.Get<GridSystem>();
         gameManager = ServiceLocator.Get<GameManager>();
 
+        gridSystem.SpawnFirstRow(blobListSO.blobList);
         gameManager.OnNextStep += GameManager_OnNextStep;
     }
 

@@ -32,19 +32,24 @@ public class BulletManager : MonoRegistrable
 
     private void ShootBullet()
     {
-        GridColumn activeGridColumn = gameManager.GetActiveGridColumn();
-        GridCell[] gridCellsArray = activeGridColumn.GetGridCellsArray();
-        int index = gridCellsArray.Length - 1;
+        Transform activeColumnTransform = gameManager.GetActiveColumnTransform();
+        GridCell activeGridCell = gridSystem.GetGridCell(activeColumnTransform);
 
-        List<BaseBullet> bulletList = bulletListSO.bulletList;
-        int randomIndex = Random.Range(0, bulletList.Count);
-        BaseBullet bulletToSpawn = bulletList[randomIndex];
-        BaseBullet newBullet = Instantiate(bulletToSpawn, gridCellsArray[index].GetGridCellTransform());
+        GridCell[,] gridCellArray = gridSystem.GetCellArray();
         
-        newBullet.TriggerSpawnAnimation();
+        int randomIndex = Random.Range(0, bulletListSO.bulletList.Count);
+        BaseBullet bulletToSpawn = bulletListSO.bulletList[randomIndex];
+        BaseBullet bullet = Instantiate(bulletToSpawn, activeGridCell.GetCellTransform());
 
-        gridCellsArray[index].SetGridObject(newBullet);
-        newBullet.SetGridCell(gridCellsArray[index]);
+        int column = activeGridCell.GetColumn();
+        int row = gridSystem.Height - 1;
+        GridCell gridCell = gridCellArray[column, row];
+
+        gridCell.SetGridObject(bullet);
+        bullet.SetGridCell(gridCell);
+
+        // DoTween
+        bullet.TriggerSpawnAnimation();
     }
 
 }

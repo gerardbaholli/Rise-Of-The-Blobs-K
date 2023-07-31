@@ -12,7 +12,7 @@ public class GameManager : MonoRegistrable
 
     [SerializeField] private CinemachineVirtualCamera virtualCamera;
 
-    private GridColumn currentActiveColumn;
+    private Transform activeColumnTransform;
 
     private float stepTimerMax = 0.5f;
     private float stepTimer;
@@ -27,7 +27,6 @@ public class GameManager : MonoRegistrable
 
     private void Start()
     {
-        //virtualCamera = FindFirstObjectByType<CinemachineVirtualCamera>();
         gridSystem = ServiceLocator.Get<GridSystem>();
 
         UpdateActiveColumn();
@@ -52,47 +51,47 @@ public class GameManager : MonoRegistrable
 
     private void UpdateActiveColumn()
     {
+
         updateActiveColumnTimer += Time.deltaTime;
         if (updateActiveColumnTimer > updateActiveColumnTimerMax)
         {
             updateActiveColumnTimer = 0f;
 
-            GridColumn[] gridColumnArray = gridSystem.GetGridColumnArray();
 
-            // Update
-            float[] dotArray = new float[gridColumnArray.Length];
+            GridCell[,] gridCellArray = gridSystem.GetCellArray();
+            float[] dotProductArray = new float[gridSystem.Width];
 
-            for (int i = 0; i < gridColumnArray.Length; i++)
+            for (int i = 0; i < gridSystem.Width; i++)
             {
-                Transform gridColumnTransform = gridColumnArray[i].GetGridColumnTransform();
+                Transform columnTransform = gridCellArray[i, gridSystem.Height - 1].GetCellTransform();
                 Transform virtualCameraTransform = virtualCamera.transform;
-                dotArray[i] = Vector3.Dot(virtualCameraTransform.forward, gridColumnTransform.forward);
+                dotProductArray[i] = Vector3.Dot(virtualCameraTransform.forward, columnTransform.forward);
             }
 
-            float activeDot = 1f;
-            GridColumn tempGridColumn = null;
+            float maxDotProduct = 1f;
+            Transform gridCellTransform = null;
 
-            for (int i = 0; i < gridColumnArray.Length; i++)
+            for (int i = 0; i < gridSystem.Width; i++)
             {
-                if (dotArray[i] < activeDot)
+                if (dotProductArray[i] < maxDotProduct)
                 {
-                    activeDot = dotArray[i];
-                    tempGridColumn = gridColumnArray[i];
+                    maxDotProduct = dotProductArray[i];
+                    gridCellTransform = gridCellArray[i, gridSystem.Height - 1].GetCellTransform();
                 }
             }
 
-            if (currentActiveColumn != tempGridColumn)
+            if (activeColumnTransform != gridCellTransform)
             {
-                currentActiveColumn = tempGridColumn;
+                activeColumnTransform = gridCellTransform;
                 OnActiveColumnChanged?.Invoke(this, new EventArgs());
             }
-            
+
         }
     }
 
-    public GridColumn GetActiveGridColumn()
+    public Transform GetActiveColumnTransform()
     {
-        return currentActiveColumn;
+        return activeColumnTransform;
     }
 
     public float GetStepValue()

@@ -4,40 +4,18 @@ using UnityEngine;
 
 public class GridCell
 {
+
     private IGridObject gridObject;
 
-    private GridColumn gridColumn;
-    private Transform gridCellTransform;
-    private int cellIndex;
+    private Transform cellTransform;
+    private int column;
+    private int row;
 
-    public GridCell(int cellIndex)
+    public GridCell(Transform cellTransform, int column, int row)
     {
-        this.cellIndex = cellIndex;
-    }
-
-    public int GetCellIndex()
-    {
-        return cellIndex;
-    }
-
-    public void SetGridCellColumn(GridColumn gridColumn)
-    {
-        this.gridColumn = gridColumn;
-    }
-
-    public GridColumn GetGridCellColumn()
-    {
-        return gridColumn;
-    }
-
-    public void SetGridCellTransform(Transform gridColumnTransform)
-    {
-        this.gridCellTransform = gridColumnTransform;
-    }
-
-    public Transform GetGridCellTransform()
-    {
-        return gridCellTransform;
+        this.cellTransform = cellTransform;
+        this.column = column;
+        this.row = row;
     }
 
     public void SetGridObject(IGridObject blob)
@@ -48,6 +26,21 @@ public class GridCell
     public IGridObject GetGridObject()
     {
         return this.gridObject;
+    }
+
+    public Transform GetCellTransform()
+    {
+        return cellTransform;
+    }
+
+    public int GetColumn()
+    {
+        return column;
+    }
+
+    public int GetRow()
+    {
+        return row;
     }
 
 }

@@ -112,7 +112,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   bulletVisual: {fileID: 1652396129400234694}
-  stepsRequiredToMoveDown: 0
+  stepsRequiredToMoveDown: 1
   coloredMaterialListSO: {fileID: 11400000, guid: 373dbbc7527f3cd4887127a0960f2ff8,
     type: 2}
   coloredBlobPrefab: {fileID: -3286674544657686275, guid: 3188e22366958e44c96315e48fa2920d,

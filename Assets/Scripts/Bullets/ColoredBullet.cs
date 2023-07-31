@@ -27,41 +27,41 @@ public class ColoredBullet : BaseBullet
         bulletVisual.GetComponent<MeshRenderer>().material = bulletColorMaterial;
     }
 
-    protected override void Collision(BaseBlob collidedBlob)
-    {
-        if (collidedBlob is ColoredBlob)
-        {
-            ColoredBlob coloredBlob = (ColoredBlob)collidedBlob;
-            Material coloredBlobMaterial = coloredBlob.GetColorMaterial();
+    //protected override void Collision(BaseBlob collidedBlob)
+    //{
+    //    if (collidedBlob is ColoredBlob)
+    //    {
+    //        ColoredBlob coloredBlob = (ColoredBlob)collidedBlob;
+    //        Material coloredBlobMaterial = coloredBlob.GetColorMaterial();
 
-            if (coloredBlobMaterial == bulletColorMaterial)
-            {
-                gameManager.OnNextStep -= GameManager_OnNextStep;
-                gameManager.OnActiveColumnChanged -= GameManager_OnActiveColumnChanged;
+    //        if (coloredBlobMaterial == bulletColorMaterial)
+    //        {
+    //            gameManager.OnNextStep -= GameManager_OnNextStep;
+    //            gameManager.OnActiveColumnChanged -= GameManager_OnActiveColumnChanged;
 
-                currentGridCell.SetGridObject(null);
+    //            currentGridCell.SetGridObject(null);
 
-                collidedBlob.DestroyBlob();
+    //            collidedBlob.DestroyBlob();
 
-                gridSystem.CompactGrid();
-                Destroy(gameObject);
-            }
-            else
-            {
-                // TODO: Big BUG here
+    //            //gridSystem.CompactGrid();
+    //            Destroy(gameObject);
+    //        }
+    //        else
+    //        {
+    //            // TODO: Big BUG here
 
-                //Debug.Log("2 " + bulletColorMaterial.name);
-                //ColoredBlob coloredBlobToSpawn = coloredBlobPrefab;
-                //coloredBlobToSpawn.SetColorMaterial(bulletColorMaterial);
+    //            //Debug.Log("2 " + bulletColorMaterial.name);
+    //            //ColoredBlob coloredBlobToSpawn = coloredBlobPrefab;
+    //            //coloredBlobToSpawn.SetColorMaterial(bulletColorMaterial);
 
-                //ColoredBlob newBlob = Instantiate(coloredBlobToSpawn, currentGridCell.GetGridCellTransform());
+    //            //ColoredBlob newBlob = Instantiate(coloredBlobToSpawn, currentGridCell.GetGridCellTransform());
 
-                //newBlob.transform.localScale = Vector3.zero;
-                //newBlob.transform.DOScale(1f, 1f);
-                //currentGridCell.SetGridObject(newBlob);
-                //Destroy(gameObject);
-            }
-        }
-    }
+    //            //newBlob.transform.localScale = Vector3.zero;
+    //            //newBlob.transform.DOScale(1f, 1f);
+    //            //currentGridCell.SetGridObject(newBlob);
+    //            //Destroy(gameObject);
+    //        }
+    //    }
+    //}
 
 }
