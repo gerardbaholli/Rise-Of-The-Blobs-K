@@ -4,43 +4,45 @@ using UnityEngine;
 
 public class GridCell
 {
+    public int X { get; private set; }
+    public int Y { get; private set; }
+    public GameObject cellGameObject { get; private set; }
+    public GridObject gridObject { get; set; }
 
-    private IGridObject gridObject;
-
-    private Transform cellTransform;
-    private int column;
-    private int row;
-
-    public GridCell(Transform cellTransform, int column, int row)
+    public GridCell(GameObject gridCellGO, int x, int y)
     {
-        this.cellTransform = cellTransform;
-        this.column = column;
-        this.row = row;
+        this.cellGameObject = gridCellGO;
+        X = x;
+        Y = y;
     }
 
-    public void SetGridObject(IGridObject blob)
+    public Transform GetTransform()
     {
-        this.gridObject = blob;
+        return cellGameObject.transform;
     }
 
-    public IGridObject GetGridObject()
+    public Vector3 GetPosition()
     {
-        return this.gridObject;
+        return cellGameObject.transform.position;
     }
 
-    public Transform GetCellTransform()
+    public Quaternion GetRotation()
     {
-        return cellTransform;
+        return cellGameObject.transform.rotation;
     }
 
-    public int GetColumn()
+    public void SetAndMoveGridObject(GridObject gridObject)
     {
-        return column;
-    }
+        if (this.gridObject != null)
+            Debug.LogError("SetAndMoveGridObject: not a free position!");
 
-    public int GetRow()
-    {
-        return row;
+        // Set
+        this.gridObject = gridObject;
+        
+        // Move
+        gridObject.transform.position = GetPosition();
+        gridObject.transform.rotation = GetRotation();
+
     }
 
 }

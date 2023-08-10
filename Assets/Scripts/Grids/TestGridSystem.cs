@@ -46,14 +46,15 @@ public class TestGridSystem : MonoRegistrable
                 Vector3 cellPosition = new Vector3(columnTransform.position.x, y, columnTransform.position.z);
                 Quaternion cellRotation = columnTransform.rotation;
 
-                GameObject cell = new GameObject("Cell " + y);
-                cell.transform.position = cellPosition;
-                cell.transform.rotation = cellRotation;
-
-                Transform cellTransform = cell.transform;
+                // Create Cell GameObject
+                GameObject gridCellGO = new GameObject("Cell " + y);
+                Transform cellTransform = gridCellGO.transform;
+                cellTransform.position = cellPosition;
+                cellTransform.rotation = cellRotation;
                 cellTransform.parent = columnTransform.transform;
 
-                gridCellArray[x, y] = new GridCell(cellTransform, x, y);
+                GridCell gridCell = new GridCell(gridCellGO, x, y);
+                gridCellArray[x, y] = gridCell;
             }
         }
     }

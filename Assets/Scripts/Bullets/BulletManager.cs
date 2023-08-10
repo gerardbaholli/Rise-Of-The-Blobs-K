@@ -1,21 +1,24 @@
 using Services;
-using System.Collections.Generic;
+using System;
 using UnityEngine;
 
 public class BulletManager : MonoRegistrable
 {
 
+    public event EventHandler<BaseBullet> OnBulletSpawned;
+
     [SerializeField] BulletListSO bulletListSO;
-    [SerializeField] Transform bulletSpawnTransform;
 
     private GridSystem gridSystem;
     private GameManager gameManager;
+
+    private bool isBusy = false;
 
     private void Awake()
     {
         ServiceLocator.Register(this);
     }
-
+     
     private void Start()
     {
         gridSystem = ServiceLocator.Get<GridSystem>();
@@ -24,7 +27,7 @@ public class BulletManager : MonoRegistrable
 
     private void LateUpdate()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space) && !isBusy)
         {
             ShootBullet();
         }
@@ -36,20 +39,36 @@ public class BulletManager : MonoRegistrable
         GridCell activeGridCell = gridSystem.GetGridCell(activeColumnTransform);
 
         GridCell[,] gridCellArray = gridSystem.GetCellArray();
-        
-        int randomIndex = Random.Range(0, bulletListSO.bulletList.Count);
-        BaseBullet bulletToSpawn = bulletListSO.bulletList[randomIndex];
-        BaseBullet bullet = Instantiate(bulletToSpawn, activeGridCell.GetCellTransform());
 
-        int column = activeGridCell.GetColumn();
+        int randomIndex = UnityEngine.Random.Range(0, bulletListSO.bulletList.Count);
+        BaseBullet bulletToSpawn = bulletListSO.bulletList[randomIndex];
+        BaseBullet bullet = Instantiate(bulletToSpawn, activeGridCell.GetTransform());
+
+        int column = activeGridCell.X;
         int row = gridSystem.Height - 1;
         GridCell gridCell = gridCellArray[column, row];
 
-        gridCell.SetGridObject(bullet);
+        gridCell.gridObject = bullet;
         bullet.SetGridCell(gridCell);
 
         // DoTween
-        bullet.TriggerSpawnAnimation();
+        //bullet.TriggerSpawnAnimation();
+
+        bullet.OnCollisionStart += Bullet_OnCollisionStart;
+        bullet.OnCollisionEnd += Bullet_OnCollisionEnd;
+        isBusy = true;
+
+        OnBulletSpawned?.Invoke(this, bullet);
     }
 
+    private void Bullet_OnCollisionStart(object sender, System.EventArgs e)
+    {
+        ((BaseBullet)sender).OnCollisionStart -= Bullet_OnCollisionStart;
+    }
+
+    private void Bullet_OnCollisionEnd(object sender, System.EventArgs e)
+    {
+        isBusy = false;
+        ((BaseBullet)sender).OnCollisionEnd -= Bullet_OnCollisionEnd;
+    }
 }

@@ -1,3 +1,4 @@
+using Services;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -24,52 +25,46 @@ public class ColoredBlob : BaseBlob
         blobVisual.GetComponent<MeshRenderer>().material = blobColorMaterial;
     }
 
-    public void SetColorMaterial(Material colorMaterial)
-    {
-        blobColorMaterial = colorMaterial;
-    }
-
     public Material GetColorMaterial()
     {
         return blobColorMaterial;
     }
 
-    //public override void DestroyBlob()
-    //{
-    //    if (currentGridCell == null)
-    //    {
-    //        Debug.Log("3 " + currentGridCell);
-    //    }
+    public override void DestroyBlob()
+    {
+        if (!hasToBeDestroyed)
+        {
+            hasToBeDestroyed = true;
 
-    //    if (!hasToBeDestroyed)
-    //    {
-    //        hasToBeDestroyed = true;
+            GridCell upGridCell = gridSystem.GetUpGridCell(currentGridCell);
+            GridCell downGridCell = gridSystem.GetDownGridCell(currentGridCell);
+            GridCell leftGridCell = gridSystem.GetLeftGridCell(currentGridCell);
+            GridCell rightGridCell = gridSystem.GetRightGridCell(currentGridCell);
 
-    //        GridCell upGridCell = gridSystem.GetUpGridCell(currentGridCell);
-    //        GridCell downGridCell = gridSystem.GetDownGridCell(currentGridCell);
-    //        GridCell leftGridCell = gridSystem.GetLeftGridCell(currentGridCell);
-    //        GridCell rightGridCell = gridSystem.GetRightGridCell(currentGridCell);
+            CheckColoredBlob(upGridCell);
+            CheckColoredBlob(downGridCell);
+            CheckColoredBlob(leftGridCell);
+            CheckColoredBlob(rightGridCell);
 
-    //        CheckColoredBlob(upGridCell);
-    //        CheckColoredBlob(downGridCell);
-    //        CheckColoredBlob(leftGridCell);
-    //        CheckColoredBlob(rightGridCell);
-
-    //        Debug.Log("4 " + currentGridCell);
-
-    //        currentGridCell.SetGridObject(null);
-    //        Destroy(gameObject);
-    //    }
-    //}
+            gridSystem.RemoveObjectFromGridCell(this);
+            currentGridCell = null;
+            gameObject.SetActive(false);
+        }
+    }
 
     private void CheckColoredBlob(GridCell gridCell)
     {
         if (gridCell == null)
+        {
+            return;
+        }
+
+        if (gridCell.gridObject == null)
             return;
 
-        if (gridCell.GetGridObject() is ColoredBlob)
+        if (gridCell.gridObject is ColoredBlob)
         {
-            ColoredBlob coloredBlob = gridCell.GetGridObject() as ColoredBlob;
+            ColoredBlob coloredBlob = gridCell.gridObject as ColoredBlob;
 
             if (blobColorMaterial == coloredBlob.GetColorMaterial())
             {

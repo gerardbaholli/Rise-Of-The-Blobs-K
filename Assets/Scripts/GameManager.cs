@@ -9,13 +9,15 @@ public class GameManager : MonoRegistrable
     public event EventHandler OnActiveColumnChanged;
 
     private GridSystem gridSystem;
+    private BulletManager bulletManager;
 
     [SerializeField] private CinemachineVirtualCamera virtualCamera;
 
     private Transform activeColumnTransform;
 
-    private float stepTimerMax = 0.5f;
+    private float stepTimerMax = 0.25f;
     private float stepTimer;
+    private bool isPaused = false;
 
     private float updateActiveColumnTimerMax = 0.1f;
     private float updateActiveColumnTimer;
@@ -28,7 +30,10 @@ public class GameManager : MonoRegistrable
     private void Start()
     {
         gridSystem = ServiceLocator.Get<GridSystem>();
+        bulletManager = ServiceLocator.Get<BulletManager>();
 
+
+        bulletManager.OnBulletSpawned += BulletManager_OnBulletSpawned;
         UpdateActiveColumn();
     }
 
@@ -40,11 +45,14 @@ public class GameManager : MonoRegistrable
 
     private void UpdateStep()
     {
-        stepTimer += Time.deltaTime;
+        if (!isPaused)
+            stepTimer += Time.deltaTime;
+
         if (stepTimer > stepTimerMax)
         {
             stepTimer = 0f;
 
+            Debug.Log("OnNextStep");
             OnNextStep?.Invoke(this, EventArgs.Empty);
         }
     }
@@ -53,7 +61,7 @@ public class GameManager : MonoRegistrable
     {
 
         updateActiveColumnTimer += Time.deltaTime;
-        if (updateActiveColumnTimer > updateActiveColumnTimerMax)
+        if (updateActiveColumnTimer > updateActiveColumnTimerMax || activeColumnTransform is null)
         {
             updateActiveColumnTimer = 0f;
 
@@ -63,7 +71,7 @@ public class GameManager : MonoRegistrable
 
             for (int i = 0; i < gridSystem.Width; i++)
             {
-                Transform columnTransform = gridCellArray[i, gridSystem.Height - 1].GetCellTransform();
+                Transform columnTransform = gridCellArray[i, gridSystem.Height - 1].GetTransform();
                 Transform virtualCameraTransform = virtualCamera.transform;
                 dotProductArray[i] = Vector3.Dot(virtualCameraTransform.forward, columnTransform.forward);
             }
@@ -76,7 +84,7 @@ public class GameManager : MonoRegistrable
                 if (dotProductArray[i] < maxDotProduct)
                 {
                     maxDotProduct = dotProductArray[i];
-                    gridCellTransform = gridCellArray[i, gridSystem.Height - 1].GetCellTransform();
+                    gridCellTransform = gridCellArray[i, gridSystem.Height - 1].GetTransform();
                 }
             }
 
@@ -89,14 +97,26 @@ public class GameManager : MonoRegistrable
         }
     }
 
+    private void BulletManager_OnBulletSpawned(object sender, BaseBullet bullet)
+    {
+        bullet.OnCollisionStart += Bullet_OnCollisionStart;
+        bullet.OnCollisionEnd += Bullet_OnCollisionEnd;
+    }
+
+    private void Bullet_OnCollisionStart(object sender, EventArgs e)
+    {
+        isPaused = true;
+    }
+
+    private void Bullet_OnCollisionEnd(object sender, EventArgs e)
+    {
+        gridSystem.CompactGrid();
+        isPaused = false;
+    }
+
     public Transform GetActiveColumnTransform()
     {
         return activeColumnTransform;
-    }
-
-    public float GetStepValue()
-    {
-        return stepTimerMax;
     }
 
 }

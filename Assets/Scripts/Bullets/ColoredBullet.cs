@@ -1,9 +1,4 @@
-using DG.Tweening;
-using DG.Tweening.Core.Easing;
-using System.Collections;
-using System.Collections.Generic;
-using System.Numerics;
-using Unity.VisualScripting;
+using System;
 using UnityEngine;
 
 public class ColoredBullet : BaseBullet
@@ -22,46 +17,46 @@ public class ColoredBullet : BaseBullet
     protected override void Start()
     {
         base.Start();
-        int randomIndex = Random.Range(0, coloredMaterialListSO.coloredMaterialList.Count);
+        int randomIndex = UnityEngine.Random.Range(0, coloredMaterialListSO.coloredMaterialList.Count);
         bulletColorMaterial = coloredMaterialListSO.coloredMaterialList[randomIndex];
         bulletVisual.GetComponent<MeshRenderer>().material = bulletColorMaterial;
     }
 
-    //protected override void Collision(BaseBlob collidedBlob)
-    //{
-    //    if (collidedBlob is ColoredBlob)
-    //    {
-    //        ColoredBlob coloredBlob = (ColoredBlob)collidedBlob;
-    //        Material coloredBlobMaterial = coloredBlob.GetColorMaterial();
+    public override void CollisionEffect(BaseBlob collidedBlob)
+    {
+        CollisionStart();
 
-    //        if (coloredBlobMaterial == bulletColorMaterial)
-    //        {
-    //            gameManager.OnNextStep -= GameManager_OnNextStep;
-    //            gameManager.OnActiveColumnChanged -= GameManager_OnActiveColumnChanged;
+        if (collidedBlob is ColoredBlob)
+        {
+            ColoredBlob coloredBlob = (ColoredBlob)collidedBlob;
+            Material coloredBlobMaterial = coloredBlob.GetColorMaterial();
 
-    //            currentGridCell.SetGridObject(null);
+            if (coloredBlobMaterial == bulletColorMaterial)
+            {
+                // Unsub from services
+                gameManager.OnNextStep -= GameManager_OnNextStep;
+                gameManager.OnActiveColumnChanged -= GameManager_OnActiveColumnChanged;
 
-    //            collidedBlob.DestroyBlob();
+                // Remove from grid
+                gridSystem.RemoveObjectFromGridCell(this);
+                //gridSystem.RemoveObjectFromGrid(coloredBlob);
 
-    //            //gridSystem.CompactGrid();
-    //            Destroy(gameObject);
-    //        }
-    //        else
-    //        {
-    //            // TODO: Big BUG here
+                // Remove visual
+                gameObject.SetActive(false);
+                //coloredBlob.gameObject.SetActive(false);
 
-    //            //Debug.Log("2 " + bulletColorMaterial.name);
-    //            //ColoredBlob coloredBlobToSpawn = coloredBlobPrefab;
-    //            //coloredBlobToSpawn.SetColorMaterial(bulletColorMaterial);
 
-    //            //ColoredBlob newBlob = Instantiate(coloredBlobToSpawn, currentGridCell.GetGridCellTransform());
+                coloredBlob.DestroyBlob();
 
-    //            //newBlob.transform.localScale = Vector3.zero;
-    //            //newBlob.transform.DOScale(1f, 1f);
-    //            //currentGridCell.SetGridObject(newBlob);
-    //            //Destroy(gameObject);
-    //        }
-    //    }
-    //}
+
+                // TODO: destroy...
+                //gridSystem.CompactGrid();
+                //Destroy(gameObject);
+            }
+        }
+
+        CollisionEnd();
+
+    }
 
 }

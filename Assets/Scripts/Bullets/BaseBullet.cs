@@ -3,14 +3,15 @@ using UnityEngine;
 using DG.Tweening;
 using System;
 
-public class BaseBullet : MonoBehaviour, IGridObject
+public class BaseBullet : GridObject
 {
+    public event EventHandler OnCollisionStart;
+    public event EventHandler OnCollisionEnd;
+
     [SerializeField] protected Transform bulletVisual;
 
-    [SerializeField] private int stepsRequiredToMoveDown = 1;
+    protected int stepsRequiredToMoveDown = 1;
     private int stepCounter = 0;
-
-    protected GridCell currentGridCell;
 
     protected GridSystem gridSystem;
     protected GameManager gameManager;
@@ -30,24 +31,22 @@ public class BaseBullet : MonoBehaviour, IGridObject
         transform.DOScale(1f, 1f);
     }
 
-
     protected void GameManager_OnActiveColumnChanged(object sender, EventArgs e)
     {
         Transform activeColumn = gameManager.GetActiveColumnTransform();
         Vector3 newPosition = new Vector3(activeColumn.position.x, transform.position.y, activeColumn.position.z);
         GridCell newGridCell = gridSystem.GetGridCell(newPosition);
 
-        GridCell[,] gridCellArray = gridSystem.GetCellArray();
-        int column = newGridCell.GetColumn();
-        int row = newGridCell.GetRow();
-
-        currentGridCell.SetGridObject(null);
-        gridCellArray[column, row].SetGridObject(this);
-        currentGridCell = gridCellArray[column, row];
-
-        Transform newTransform = newGridCell.GetCellTransform();
-        transform.position = newTransform.position;
-        transform.rotation = newTransform.rotation;
+        if (gridSystem.TrySetObjectToGridCell(newGridCell, this))
+        {
+            Transform newTransform = newGridCell.GetTransform();
+            transform.position = newTransform.position;
+            transform.rotation = newTransform.rotation;
+        }
+        else
+        {
+            Debug.LogError("GameManager_OnActiveColumnChanged failed");
+        }
     }
 
     protected void GameManager_OnNextStep(object sender, EventArgs e)
@@ -60,38 +59,29 @@ public class BaseBullet : MonoBehaviour, IGridObject
         {
             GridCell downGridCell = gridSystem.GetDownGridCell(currentGridCell);
 
+            if (downGridCell is null)
+                return;
 
-            if (downGridCell != null)
+            if (downGridCell.gridObject is BaseBlob)
             {
-                currentGridCell.SetGridObject(null);
-                downGridCell.SetGridObject(this);
-                currentGridCell = downGridCell;
-
-                Transform newTransform = downGridCell.GetCellTransform();
-                transform.position = newTransform.position;
-                transform.rotation = newTransform.rotation;
+                CollisionEffect(downGridCell.gridObject as BaseBlob);
+            }
+            else
+            {
+                if (gridSystem.TrySetObjectToGridCell(downGridCell, this))
+                {
+                    Transform newTransform = downGridCell.GetTransform();
+                    transform.position = newTransform.position;
+                    transform.rotation = newTransform.rotation;
+                }
+                else
+                {
+                    Debug.LogError("GameManager_OnNextStep failed");
+                }
             }
 
-
-            //if (nextGridCell.GetGridObject() is BaseBlob)
-            //{
-            //    Collision(nextGridCell.GetGridObject() as BaseBlob);
-            //}
-            //else
-            //{
-            //    Transform newTransform = nextGridCell.GetGridCellTransform();
-
-            //    //transform.DOMove(newTransform.position, gameManager.GetStepValue());
-            //    transform.position = newTransform.position;
-            //    transform.rotation = newTransform.rotation;
-
-            //    Debug.Log("1 " + currentGridCell);
-            //    currentGridCell.SetGridObject(null);
-            //    gridCellArray[nextIndex].SetGridObject(this);
-            //    currentGridCell = nextGridCell;
-            //    Debug.Log("2 " + currentGridCell);
-            //}
             stepCounter = 0;
+
         }
     }
 
@@ -100,9 +90,13 @@ public class BaseBullet : MonoBehaviour, IGridObject
         currentGridCell = gridCell;
     }
 
-    protected virtual void Collision(BaseBlob collidedBlob)
+    public virtual void CollisionEffect(BaseBlob collidedBlob)
     {
-        Debug.LogError("Not implemented");
+        Debug.LogError("CollisionEffect not implemented!");
     }
+
+    protected void CollisionStart() => OnCollisionStart?.Invoke(this, EventArgs.Empty);
+
+    protected void CollisionEnd() => OnCollisionEnd?.Invoke(this, EventArgs.Empty);
 
 }

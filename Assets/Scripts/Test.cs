@@ -1,5 +1,8 @@
 using UnityEngine;
 using Services;
+using System.Linq;
+using NUnit.Framework;
+using System.Collections.Generic;
 
 public class Test : MonoBehaviour
 {
@@ -8,6 +11,7 @@ public class Test : MonoBehaviour
     private GameManager gameManager;
 
     private GridCell[,] gridCellArray;
+    [SerializeField] private ColoredMaterialListSO coloredMaterialList;
 
     private void Start()
     {
@@ -15,7 +19,7 @@ public class Test : MonoBehaviour
         gameManager = ServiceLocator.Get<GameManager>();
 
         gridCellArray = gridSystem.GetCellArray();
-        //gameManager.OnNextStep += GameManager_OnNextStep;
+        gameManager.OnNextStep += GameManager_OnNextStep;
     }
 
     private void FixedUpdate()
@@ -36,7 +40,7 @@ public class Test : MonoBehaviour
         {
             for (int x = 0; x < 20; x++)
             {
-                IGridObject gridObject = gridCellArray[x, y].GetGridObject();
+                GridObject gridObject = gridCellArray[x, y].gridObject;
 
                 if (gridObject is BaseBullet)
                 {
@@ -44,7 +48,26 @@ public class Test : MonoBehaviour
                 }
                 else if (gridObject is BaseBlob)
                 {
-                    message = message + " " + "O";
+                    //Debug.Log(((ColoredBlob)gridObject).GetComponentInChildren<Renderer>().material.name);
+                    if (gridObject is ColoredBlob)
+                    {
+                        if (((ColoredBlob)gridObject).GetColorMaterial() != null)
+                        {
+
+                            if (((ColoredBlob)gridObject).GetColorMaterial().Equals(coloredMaterialList.coloredMaterialList.ElementAt(0)))
+                            {
+                                message = message + " " + "Y";
+                            }
+                            else if (((ColoredBlob)gridObject).GetColorMaterial().Equals(coloredMaterialList.coloredMaterialList.ElementAt(1)))
+                            {
+                                message = message + " " + "O";
+                            }
+                            else if (((ColoredBlob)gridObject).GetColorMaterial().Equals(coloredMaterialList.coloredMaterialList.ElementAt(2)))
+                            {
+                                message = message + " " + "G";
+                            }
+                        }
+                    }
                 }
                 else
                 {
