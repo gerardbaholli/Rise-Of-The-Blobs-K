@@ -11,23 +11,40 @@ public class ColoredBlob : BaseBlob
 
     private bool hasToBeDestroyed = false;
 
-    public ColoredBlob(Material blobColorMaterial)
-    {
-        this.blobColorMaterial = blobColorMaterial;
-        blobVisual.GetComponent<MeshRenderer>().material = blobColorMaterial;
-    }
-
     protected override void Start()
     {
         base.Start();
         int randomIndex = Random.Range(0, coloredMaterialListSO.coloredMaterialList.Count);
-        blobColorMaterial = coloredMaterialListSO.coloredMaterialList[randomIndex];
-        blobVisual.GetComponent<MeshRenderer>().material = blobColorMaterial;
+        SetColorMaterial(coloredMaterialListSO.coloredMaterialList[randomIndex]);
     }
 
     public Material GetColorMaterial()
     {
-        return blobColorMaterial;
+        return blobVisual.GetComponent<MeshRenderer>().material;
+    }
+
+    public void SetColorMaterial(Material blobColorMaterial)
+    {
+        blobVisual.GetComponent<MeshRenderer>().material = blobColorMaterial;
+        //Debug.Log(GetColorMaterial().ToString());
+    }
+
+    public string PrintColor()
+    {
+        if (GetColorMaterial() == coloredMaterialListSO.coloredMaterialList[2])
+        {
+            return "G";
+        }
+        else if (GetColorMaterial() == coloredMaterialListSO.coloredMaterialList[1])
+        {
+            return "O";
+        }
+        else if (GetColorMaterial() == coloredMaterialListSO.coloredMaterialList[0])
+        {
+            return "Y";
+        }
+
+        return "-";
     }
 
     public override void DestroyBlob()
@@ -46,7 +63,7 @@ public class ColoredBlob : BaseBlob
             CheckColoredBlob(leftGridCell);
             CheckColoredBlob(rightGridCell);
 
-            gridSystem.RemoveObjectFromGridCell(this);
+            gridSystem.RemoveGridObjectFromGridCell(this);
             currentGridCell = null;
             gameObject.SetActive(false);
         }

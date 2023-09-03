@@ -65,11 +65,6 @@ public class BlobManager : MonoRegistrable
             Transform gridCellParent = gridCellArray[x, 0].GetTransform();
             BaseBlob blob = Instantiate(GenerateRandomBlob(blobListSO.blobList), gridCellParent);
 
-            // DoTween
-            //Transform blobTransform = blob.transform;
-            //blobTransform.localScale = Vector3.zero;
-            //blobTransform.DOScale(1f, 1f);
-
             gridCellArray[x, 0].gridObject = blob;
             blob.SetCurrentGridCell(gridCellArray[x, 0]);
         }
@@ -97,19 +92,6 @@ public class BlobManager : MonoRegistrable
                     gridCellArray[x, y - 1].gridObject is BaseBullet)
                     continue;
 
-                //Case if blob collide with bullet
-                if (gridCellArray[x, y].gridObject is BaseBullet &&
-                    gridCellArray[x, y - 1].gridObject is BaseBlob)
-                {
-                    if (gridCellArray[x, y - 1].gridObject is ColoredBlob)
-                    {
-                        BaseBullet bullet = (BaseBullet)gridCellArray[x, y].gridObject;
-                        ColoredBlob coloredBlob = (ColoredBlob)gridCellArray[x, y - 1].gridObject;
-                        bullet.CollisionEffect(coloredBlob);
-                    }
-                    continue;
-                }
-
                 BaseBlob downBlob = gridCellArray[x, y - 1].gridObject as BaseBlob;
                 downBlob.transform.parent = gridCellArray[x, y].GetTransform();
 
@@ -120,9 +102,6 @@ public class BlobManager : MonoRegistrable
                 if (gridCellArray[x, y].gridObject != null)
                 {
                     Vector3 endPosition = gridCellArray[x, y].GetPosition();
-
-                    // DoTween
-                    //downBlob.gameObject.transform.DOMove(endPosition, 1f).SetEase(Ease.InOutCirc);
 
                     downBlob.gameObject.transform.position = gridCellArray[x, y].GetPosition();
                     downBlob.gameObject.transform.rotation = gridCellArray[x, y].GetRotation();

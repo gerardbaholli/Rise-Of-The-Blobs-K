@@ -8,55 +8,124 @@ public class ColoredBullet : BaseBullet
 
     private Material bulletColorMaterial;
 
-    public ColoredBullet(Material bulletColorMaterial)
-    {
-        this.bulletColorMaterial = bulletColorMaterial;
-        bulletVisual.GetComponent<MeshRenderer>().material = bulletColorMaterial;
-    }
-
     protected override void Start()
     {
         base.Start();
         int randomIndex = UnityEngine.Random.Range(0, coloredMaterialListSO.coloredMaterialList.Count);
         bulletColorMaterial = coloredMaterialListSO.coloredMaterialList[randomIndex];
-        bulletVisual.GetComponent<MeshRenderer>().material = bulletColorMaterial;
+        SetColorMaterial(bulletColorMaterial);
     }
 
-    public override void CollisionEffect(BaseBlob collidedBlob)
+    private void SetColorMaterial(Material colorMaterial)
     {
-        CollisionStart();
+        bulletVisual.GetComponent<MeshRenderer>().material = colorMaterial;
+    }
+
+    private Material GetColorMaterial()
+    {
+        return bulletVisual.GetComponent<MeshRenderer>().material;
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        BaseBlob collidedBlob = collision.gameObject.GetComponent<BaseBlob>();
 
         if (collidedBlob is ColoredBlob)
         {
-            ColoredBlob coloredBlob = (ColoredBlob)collidedBlob;
-            Material coloredBlobMaterial = coloredBlob.GetColorMaterial();
 
-            if (coloredBlobMaterial == bulletColorMaterial)
+            ColoredBlob collidedColoredBlob = (ColoredBlob)collidedBlob;
+            Material coloredBlobMaterial = collidedColoredBlob.GetColorMaterial();
+
+
+            if (coloredBlobMaterial.mainTexture == bulletColorMaterial.mainTexture)
             {
+                Debug.Log("Right Collision");
+
                 // Unsub from services
-                gameManager.OnNextStep -= GameManager_OnNextStep;
-                gameManager.OnActiveColumnChanged -= GameManager_OnActiveColumnChanged;
+                //gameManager.OnNextStep -= GameManager_OnNextStep;
+                //gameManager.OnActiveColumnChanged -= GameManager_OnActiveColumnChanged;
 
                 // Remove from grid
-                gridSystem.RemoveObjectFromGridCell(this);
+                //gridSystem.RemoveGridObjectFromGridCell(this);
                 //gridSystem.RemoveObjectFromGrid(coloredBlob);
 
                 // Remove visual
                 gameObject.SetActive(false);
                 //coloredBlob.gameObject.SetActive(false);
 
+                collidedColoredBlob.DestroyBlob();
+            }
+            else
+            {
+                Debug.Log("Wrong Collision");
 
-                coloredBlob.DestroyBlob();
+                // Unsub from services
+                //gameManager.OnNextStep -= GameManager_OnNextStep;
+                //gameManager.OnActiveColumnChanged -= GameManager_OnActiveColumnChanged;
 
-
-                // TODO: destroy...
-                //gridSystem.CompactGrid();
-                //Destroy(gameObject);
+                // Add new blob to grid
+                //ColoredBlob newColoredBlob = Instantiate(coloredBlobPrefab, currentGridCell.GetTransform());
+                //gridSystem.AddGridObjectToGridCell(newColoredBlob, currentGridCell);
+                //newColoredBlob.SetColorMaterial(bulletColorMaterial);
             }
         }
 
         CollisionEnd();
 
+        DestroyBullet();
     }
+
+    //public override void CollisionEffect(BaseBlob collidedBlob)
+    //{
+    //    CollisionStart();
+
+    //    if (collidedBlob is ColoredBlob)
+    //    {
+
+    //        ColoredBlob collidedColoredBlob = (ColoredBlob) collidedBlob;
+    //        Material coloredBlobMaterial = collidedColoredBlob.GetColorMaterial();
+
+
+    //        if (coloredBlobMaterial.mainTexture == bulletColorMaterial.mainTexture)
+    //        {
+    //            Debug.Log("Right Collision");
+
+    //            // Unsub from services
+    //            gameManager.OnNextStep -= GameManager_OnNextStep;
+    //            gameManager.OnActiveColumnChanged -= GameManager_OnActiveColumnChanged;
+
+    //            // Remove from grid
+    //            gridSystem.RemoveGridObjectFromGridCell(this);
+    //            //gridSystem.RemoveObjectFromGrid(coloredBlob);
+
+    //            // Remove visual
+    //            gameObject.SetActive(false);
+    //            //coloredBlob.gameObject.SetActive(false);
+
+    //            collidedColoredBlob.DestroyBlob();
+    //        }
+    //        else
+    //        {
+    //            Debug.Log("Wrong Collision");
+
+    //            // Unsub from services
+    //            gameManager.OnNextStep -= GameManager_OnNextStep;
+    //            gameManager.OnActiveColumnChanged -= GameManager_OnActiveColumnChanged;
+
+    //            // Remove bullet from grid
+    //            gridSystem.RemoveGridObjectFromGridCell(this);
+
+    //            // Add new blob to grid
+    //            ColoredBlob newColoredBlob = Instantiate(coloredBlobPrefab, currentGridCell.GetTransform());
+    //            gridSystem.AddGridObjectToGridCell(newColoredBlob, currentGridCell);
+    //            newColoredBlob.SetColorMaterial(bulletColorMaterial);
+    //        }
+    //    }
+
+    //    CollisionEnd();
+
+    //    Destroy(gameObject);
+    //}
+
 
 }

@@ -1,6 +1,9 @@
 using DG.Tweening;
 using Services;
+using System.Collections;
 using System.Collections.Generic;
+using System.Security.Cryptography.X509Certificates;
+using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -109,6 +112,38 @@ public class GridSystem : MonoRegistrable
         return null;
     }
 
+    public GridCell GetNearestGridCell(Vector3 worldPosition)
+    {
+        int tempX = 0;
+
+        for (int x = 0; x < Width; x++)
+        {
+            Debug.Log("x: " + Mathf.RoundToInt(gridCellArray[x, 0].GetPosition().x) + " " + Mathf.RoundToInt(worldPosition.x));
+            Debug.Log("z: " + Mathf.RoundToInt(gridCellArray[x, 0].GetPosition().z) + " " + Mathf.RoundToInt(worldPosition.z));
+
+            if (Mathf.RoundToInt(gridCellArray[x, 0].GetPosition().x) == Mathf.RoundToInt(worldPosition.x) &&
+                Mathf.RoundToInt(gridCellArray[x, 0].GetPosition().z) == Mathf.RoundToInt(worldPosition.z))
+            {
+                tempX = x;
+                break;
+            }
+
+            if (x == Width - 1)
+                Debug.LogWarning("NON HA TROVATO NULLA");
+        }
+
+        for (int y = 0; y < Height; y++)
+        {
+            if (Vector3.Distance(gridCellArray[tempX, y].GetPosition(), worldPosition) < 1.0f)
+            {
+                Debug.Log("Grid Cell: " + gridCellArray[tempX, y].cellGameObject.name);
+                return gridCellArray[tempX, y];
+            }
+        }
+
+        return null;
+    }
+
     public void CompactGrid()
     {
         for (int x = 0; x < Width; x++)
@@ -121,31 +156,56 @@ public class GridSystem : MonoRegistrable
 
                 if (gridObject == null)
                 {
+                    // Increase count if the cell is empty.
                     count++;
                     continue;
                 }
 
                 if (gridObject is BaseBullet)
                 {
+                    // Break the count if a bullet is encountered.
                     break;
                 }
 
-                if (count == 0)
+                if (count > 0)
                 {
-                    continue;
+                    // Se ci sono celle vuote sopra, sposta l'oggetto verso l'alto con interpolazione.
+                    BaseBlob blob = gridCellArray[x, y].gridObject as BaseBlob;
+                    gridCellArray[x, y].gridObject = null;
+                    gridCellArray[x, y - count].gridObject = blob;
+
+                    // blob.gameObject.transform.position = gridCellArray[x, y - count].GetPosition();
+                    // blob.gameObject.transform.rotation = gridCellArray[x, y - count].GetRotation(); // Possibly unnecessary
+
+                    Vector3 targetPosition = gridCellArray[x, y - count].GetPosition();
+                    StartCoroutine(MoveObjectAsync(blob.gameObject, targetPosition));
+
+                    y -= count;
+                    count = 0;
                 }
 
-                BaseBlob blob = gridCellArray[x, y].gridObject as BaseBlob;
-                gridCellArray[x, y].gridObject = null;
-                gridCellArray[x, y - count].gridObject = blob;
-
-                blob.gameObject.transform.position = gridCellArray[x, y - count].GetPosition();
-                blob.gameObject.transform.rotation = gridCellArray[x, y - count].GetRotation(); // Maybe useless
-
-                y -= count;
-                count = 0;
             }
         }
+    }
+
+    private IEnumerator MoveObjectAsync(GameObject obj, Vector3 targetPosition)
+    {
+        float journeyLength = Vector3.Distance(obj.transform.position, targetPosition);
+        float startTime = Time.time;
+        float distanceCovered = 0.0f;
+        float movingSpeed = 0.75f;
+
+        while (distanceCovered < journeyLength)
+        {
+            float fractionOfJourney = distanceCovered / journeyLength;
+            obj.transform.position = Vector3.Lerp(obj.transform.position, targetPosition, fractionOfJourney);
+
+            distanceCovered = (Time.time - startTime) * movingSpeed;
+
+            yield return null;
+        }
+
+        obj.transform.position = targetPosition;
     }
 
     public GridCell GetUpGridCell(GridCell gridCell)
@@ -243,51 +303,35 @@ public class GridSystem : MonoRegistrable
         return false;
     }
 
-    // Ma a cosa mi serve se posso eseguire questo controllo direttamente nel codice in cui mi serve
-    public bool IsFree(GridCell gridCellToCheck)
+    public void AddGridObjectToGridCell(GridObject gridObjectToAdd, GridCell gridCell)
     {
-        if (gridCellToCheck is not null)
-        {
-            //Debug.Log("is not null");
-            //Debug.Log(gridCellToCheck.gridObject == null);
-            return gridCellToCheck.gridObject == null;
-        }
+        int x = gridCell.X;
+        int y = gridCell.Y;
 
-        Debug.Log("is null");
-        return false;
-    }
-
-    public void MoveObjectToGridCell(GridCell gridCellToSet, GridObject gridObjectToSet)
-    {
-        if (gridCellToSet == null || gridObjectToSet == null)
+        if ((x >= Width) || (y >= Height) || y < 0 || x < 0)
         {
-            Debug.LogWarning("gridCellToSet or gridObjectToSet: NULL");
+            Debug.LogError("AddGridObjectToGridCell: wrong X and/or Y.");
             return;
         }
 
+        GridObject gridObjectToCheck = gridCellArray[x, y].gridObject;
 
-        GridCell gridObjectGridCell = gridObjectToSet.GetCurrentGridCell();
-        gridObjectGridCell.gridObject = null;
-        gridCellToSet.gridObject = gridObjectToSet;
-
-        MoveGridObject(gridObjectToSet, gridCellToSet);
+        if (gridObjectToCheck is null)
+        {
+            gridCellArray[x, y].gridObject = gridObjectToAdd;
+        }
+        else
+        {
+            Debug.LogError("AddGridObjectToGridCell: gridObject is not empty.");
+        }
     }
 
-    private void MoveGridObject(GridObject gridObjectToMove, GridCell gridCellToMoveOn)
-    {
-        Debug.Log(gridCellToMoveOn.GetPosition());
-        gridObjectToMove.transform.position = gridCellToMoveOn.GetPosition();
-        gridObjectToMove.transform.rotation = gridCellToMoveOn.GetRotation();
-    }
-
-    public void RemoveObjectFromGridCell(GridObject gridObject)
+    public void RemoveGridObjectFromGridCell(GridObject gridObject)
     {
         GridCell gridObjectGridCell = gridObject.GetCurrentGridCell();
         int c = gridObjectGridCell.X;
         int r = gridObjectGridCell.Y;
         gridCellArray[c, r].gridObject = null;
-
-        //CompactGrid();
     }
 
 }

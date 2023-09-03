@@ -2,16 +2,16 @@ using Services;
 using UnityEngine;
 using DG.Tweening;
 using System;
+using Unity.VisualScripting;
 
-public class BaseBullet : GridObject
+public class BaseBullet : MonoBehaviour
 {
     public event EventHandler OnCollisionStart;
     public event EventHandler OnCollisionEnd;
 
     [SerializeField] protected Transform bulletVisual;
 
-    protected int stepsRequiredToMoveDown = 1;
-    private int stepCounter = 0;
+    private Transform currentActiveColumn;
 
     protected GridSystem gridSystem;
     protected GameManager gameManager;
@@ -21,73 +21,59 @@ public class BaseBullet : GridObject
         gridSystem = ServiceLocator.Get<GridSystem>();
         gameManager = ServiceLocator.Get<GameManager>();
 
-        gameManager.OnNextStep += GameManager_OnNextStep;
         gameManager.OnActiveColumnChanged += GameManager_OnActiveColumnChanged;
-    }
 
-    public void TriggerSpawnAnimation()
-    {
-        transform.localScale = Vector3.zero;
-        transform.DOScale(1f, 1f);
+        currentActiveColumn = gameManager.GetActiveColumnTransform();
     }
 
     protected void GameManager_OnActiveColumnChanged(object sender, EventArgs e)
     {
-        Transform activeColumn = gameManager.GetActiveColumnTransform();
-        Vector3 newPosition = new Vector3(activeColumn.position.x, transform.position.y, activeColumn.position.z);
-        GridCell newGridCell = gridSystem.GetGridCell(newPosition);
+        Debug.Log("GameManager_OnActiveColumnChanged");
 
-        if (gridSystem.TrySetObjectToGridCell(newGridCell, this))
-        {
-            Transform newTransform = newGridCell.GetTransform();
-            transform.position = newTransform.position;
-            transform.rotation = newTransform.rotation;
-        }
-        else
-        {
-            Debug.LogError("GameManager_OnActiveColumnChanged failed");
-        }
-    }
+        Transform prevActiveColumn = currentActiveColumn;
+        currentActiveColumn = gameManager.GetActiveColumnTransform();
+        Vector3 vectorMovement = (prevActiveColumn.position - currentActiveColumn.position);
 
-    protected void GameManager_OnNextStep(object sender, EventArgs e)
-    {
-        if (stepCounter < stepsRequiredToMoveDown)
-        {
-            stepCounter++;
-        }
-        else
-        {
-            GridCell downGridCell = gridSystem.GetDownGridCell(currentGridCell);
+        float dotProductVectorMovement = GetVectorDotProductFromCameraView(vectorMovement);
 
-            if (downGridCell is null)
+        GridCell nearestGridCell = gridSystem.GetNearestGridCell(transform.position);
+        Debug.LogWarning(nearestGridCell);
+
+        if (dotProductVectorMovement < 0)
+        {
+            // Going right from camera view
+            GridCell rightGridCell = gridSystem.GetRightGridCell(nearestGridCell);
+            bool isRightGridCellFree = rightGridCell.gridObject is null;
+
+            if (!isRightGridCellFree)
                 return;
-
-            if (downGridCell.gridObject is BaseBlob)
-            {
-                CollisionEffect(downGridCell.gridObject as BaseBlob);
-            }
-            else
-            {
-                if (gridSystem.TrySetObjectToGridCell(downGridCell, this))
-                {
-                    Transform newTransform = downGridCell.GetTransform();
-                    transform.position = newTransform.position;
-                    transform.rotation = newTransform.rotation;
-                }
-                else
-                {
-                    Debug.LogError("GameManager_OnNextStep failed");
-                }
-            }
-
-            stepCounter = 0;
-
         }
+        else if (dotProductVectorMovement > 0)
+        {
+            // Going left from camera view
+            GridCell leftGridCell = gridSystem.GetLeftGridCell(nearestGridCell);
+            bool isLeftGridCellFree = leftGridCell.gridObject is null;
+
+            if (!isLeftGridCellFree)
+                return;
+        }
+
+        float distance = vectorMovement.magnitude;
+        //Debug.Log(distance);
+
+        if (distance < 2.0f)
+        {
+            Vector3 newPosition = new Vector3(currentActiveColumn.position.x, transform.position.y, currentActiveColumn.position.z);
+            transform.position = newPosition;
+        }
+
     }
 
-    public void SetGridCell(GridCell gridCell)
+    private float GetVectorDotProductFromCameraView(Vector3 vector)
     {
-        currentGridCell = gridCell;
+        Vector3 cameraRightVersor = Camera.main.transform.right;
+        float dotProduct = Vector3.Dot(vector, cameraRightVersor);
+        return dotProduct; // < 0 (left); < 0 (right);
     }
 
     public virtual void CollisionEffect(BaseBlob collidedBlob)
@@ -98,5 +84,11 @@ public class BaseBullet : GridObject
     protected void CollisionStart() => OnCollisionStart?.Invoke(this, EventArgs.Empty);
 
     protected void CollisionEnd() => OnCollisionEnd?.Invoke(this, EventArgs.Empty);
+
+    protected void DestroyBullet()
+    {
+        gameManager.OnActiveColumnChanged -= GameManager_OnActiveColumnChanged;
+        Destroy(this);
+    }
 
 }

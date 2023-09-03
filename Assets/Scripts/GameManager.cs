@@ -17,10 +17,19 @@ public class GameManager : MonoRegistrable
 
     private float stepTimerMax = 0.25f;
     private float stepTimer;
-    private bool isPaused = false;
 
     private float updateActiveColumnTimerMax = 0.1f;
     private float updateActiveColumnTimer;
+
+
+    public enum GameState
+    {
+        Running,
+        Paused
+    }
+
+    private GameState gameState;
+
 
     private void Awake()
     {
@@ -32,27 +41,35 @@ public class GameManager : MonoRegistrable
         gridSystem = ServiceLocator.Get<GridSystem>();
         bulletManager = ServiceLocator.Get<BulletManager>();
 
-
         bulletManager.OnBulletSpawned += BulletManager_OnBulletSpawned;
         UpdateActiveColumn();
     }
 
     private void Update()
     {
-        UpdateActiveColumn();
-        UpdateStep();
+        switch (gameState)
+        {
+            case GameState.Running:
+                UpdateActiveColumn();
+                UpdateStep();
+                break;
+            case GameState.Paused:
+                break;
+        }
     }
+
+    public GameState GetGameState() => gameState;
 
     private void UpdateStep()
     {
-        if (!isPaused)
+        if (gameState == GameState.Running)
             stepTimer += Time.deltaTime;
 
         if (stepTimer > stepTimerMax)
         {
             stepTimer = 0f;
 
-            Debug.Log("OnNextStep");
+            //Debug.Log("OnNextStep");
             OnNextStep?.Invoke(this, EventArgs.Empty);
         }
     }
@@ -105,13 +122,13 @@ public class GameManager : MonoRegistrable
 
     private void Bullet_OnCollisionStart(object sender, EventArgs e)
     {
-        isPaused = true;
+        gameState = GameState.Paused;
     }
 
     private void Bullet_OnCollisionEnd(object sender, EventArgs e)
     {
         gridSystem.CompactGrid();
-        isPaused = false;
+        gameState = GameState.Running;
     }
 
     public Transform GetActiveColumnTransform()

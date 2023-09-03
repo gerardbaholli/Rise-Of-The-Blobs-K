@@ -48,12 +48,6 @@ public class BulletManager : MonoRegistrable
         int row = gridSystem.Height - 1;
         GridCell gridCell = gridCellArray[column, row];
 
-        gridCell.gridObject = bullet;
-        bullet.SetGridCell(gridCell);
-
-        // DoTween
-        //bullet.TriggerSpawnAnimation();
-
         bullet.OnCollisionStart += Bullet_OnCollisionStart;
         bullet.OnCollisionEnd += Bullet_OnCollisionEnd;
         isBusy = true;
@@ -61,12 +55,12 @@ public class BulletManager : MonoRegistrable
         OnBulletSpawned?.Invoke(this, bullet);
     }
 
-    private void Bullet_OnCollisionStart(object sender, System.EventArgs e)
+    private void Bullet_OnCollisionStart(object sender, EventArgs e)
     {
         ((BaseBullet)sender).OnCollisionStart -= Bullet_OnCollisionStart;
     }
 
-    private void Bullet_OnCollisionEnd(object sender, System.EventArgs e)
+    private void Bullet_OnCollisionEnd(object sender, EventArgs e)
     {
         isBusy = false;
         ((BaseBullet)sender).OnCollisionEnd -= Bullet_OnCollisionEnd;
