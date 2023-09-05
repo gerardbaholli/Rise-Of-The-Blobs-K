@@ -98,28 +98,14 @@ public class GridSystem : MonoRegistrable
         return null;
     }
 
-    public GridCell GetGridCell(Vector3 cellPosition)
-    {
-        for (int x = 0; x < Width; x++)
-        {
-            for (int y = 0; y < Height; y++)
-            {
-                if (gridCellArray[x, y].GetPosition() == cellPosition)
-                    return gridCellArray[x, y];
-            }
-        }
-
-        return null;
-    }
-
     public GridCell GetNearestGridCell(Vector3 worldPosition)
     {
         int tempX = 0;
 
         for (int x = 0; x < Width; x++)
         {
-            Debug.Log("x: " + Mathf.RoundToInt(gridCellArray[x, 0].GetPosition().x) + " " + Mathf.RoundToInt(worldPosition.x));
-            Debug.Log("z: " + Mathf.RoundToInt(gridCellArray[x, 0].GetPosition().z) + " " + Mathf.RoundToInt(worldPosition.z));
+            //Debug.Log("x: " + Mathf.RoundToInt(gridCellArray[x, 0].GetPosition().x) + " " + Mathf.RoundToInt(worldPosition.x));
+            //Debug.Log("z: " + Mathf.RoundToInt(gridCellArray[x, 0].GetPosition().z) + " " + Mathf.RoundToInt(worldPosition.z));
 
             if (Mathf.RoundToInt(gridCellArray[x, 0].GetPosition().x) == Mathf.RoundToInt(worldPosition.x) &&
                 Mathf.RoundToInt(gridCellArray[x, 0].GetPosition().z) == Mathf.RoundToInt(worldPosition.z))
@@ -128,15 +114,15 @@ public class GridSystem : MonoRegistrable
                 break;
             }
 
-            if (x == Width - 1)
-                Debug.LogWarning("NON HA TROVATO NULLA");
+            //if (x == Width - 1)
+            //Debug.LogWarning("NON HA TROVATO NULLA");
         }
 
         for (int y = 0; y < Height; y++)
         {
             if (Vector3.Distance(gridCellArray[tempX, y].GetPosition(), worldPosition) < 1.0f)
             {
-                Debug.Log("Grid Cell: " + gridCellArray[tempX, y].cellGameObject.name);
+                //Debug.Log("Grid Cell: " + gridCellArray[tempX, y].cellGameObject.name);
                 return gridCellArray[tempX, y];
             }
         }
@@ -159,12 +145,6 @@ public class GridSystem : MonoRegistrable
                     // Increase count if the cell is empty.
                     count++;
                     continue;
-                }
-
-                if (gridObject is BaseBullet)
-                {
-                    // Break the count if a bullet is encountered.
-                    break;
                 }
 
                 if (count > 0)
@@ -268,41 +248,6 @@ public class GridSystem : MonoRegistrable
         return null;
     }
 
-    public bool TrySetObjectToGridCell(GridCell gridCellToSet, GridObject gridObjectToSet)
-    {
-        if (gridCellToSet is not null && gridObjectToSet is not null)
-        {
-            // Update old grid cell
-            GridCell gridObjectGridCell = gridObjectToSet.GetCurrentGridCell();
-            int c = gridObjectGridCell.X;
-            int r = gridObjectGridCell.Y;
-            gridCellArray[c, r].gridObject = null;
-
-            gridObjectToSet.SetCurrentGridCell(null);
-
-            // Update new grid cell
-            c = gridCellToSet.X;
-            r = gridCellToSet.Y;
-            gridCellArray[c, r].gridObject = gridObjectToSet;
-
-            gridObjectToSet.SetCurrentGridCell(gridCellToSet);
-
-            // Set parent
-            Transform gridCellTransform = gridCellToSet.GetTransform();
-            gridObjectToSet.transform.parent = gridCellTransform;
-
-            return true;
-        }
-
-        if (gridCellToSet is null)
-            Debug.LogError("TrySetObjectToGridCell: gridCell is null");
-
-        if (gridObjectToSet is null)
-            Debug.LogError("TrySetObjectToGridCell: gridObject is null");
-
-        return false;
-    }
-
     public void AddGridObjectToGridCell(GridObject gridObjectToAdd, GridCell gridCell)
     {
         int x = gridCell.X;
@@ -319,6 +264,7 @@ public class GridSystem : MonoRegistrable
         if (gridObjectToCheck is null)
         {
             gridCellArray[x, y].gridObject = gridObjectToAdd;
+            gridObjectToAdd.SetCurrentGridCell(gridCellArray[x, y]);
         }
         else
         {
@@ -329,9 +275,39 @@ public class GridSystem : MonoRegistrable
     public void RemoveGridObjectFromGridCell(GridObject gridObject)
     {
         GridCell gridObjectGridCell = gridObject.GetCurrentGridCell();
+
         int c = gridObjectGridCell.X;
         int r = gridObjectGridCell.Y;
         gridCellArray[c, r].gridObject = null;
+    }
+
+    private int GetColumnIndex(Vector3 worldPosition)
+    {
+        for (int x = 0; x < Width; x++)
+        {
+            if (Mathf.RoundToInt(gridCellArray[x, 0].GetPosition().x) == Mathf.RoundToInt(worldPosition.x) &&
+                Mathf.RoundToInt(gridCellArray[x, 0].GetPosition().z) == Mathf.RoundToInt(worldPosition.z))
+            {
+                return x;
+            }
+        }
+
+        return -1;
+    }
+
+    public GridCell GetLowerFreeGridCell(Vector3 worldPosition)
+    {
+        int gridCellColumnIndex = GetColumnIndex(worldPosition);
+
+        for (int i = 0; i < Height; i++)
+        {
+            if (gridCellArray[gridCellColumnIndex, i].IsFree())
+            {
+                return gridCellArray[gridCellColumnIndex, i];
+            }
+        }
+
+        return null;
     }
 
 }

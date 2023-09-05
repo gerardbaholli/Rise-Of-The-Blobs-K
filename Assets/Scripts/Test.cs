@@ -22,11 +22,6 @@ public class Test : MonoBehaviour
         gameManager.OnNextStep += GameManager_OnNextStep;
     }
 
-    private void FixedUpdate()
-    {
-        //DebugMethod();
-    }
-
     private void GameManager_OnNextStep(object sender, System.EventArgs e)
     {
         DebugMethod();
@@ -42,11 +37,7 @@ public class Test : MonoBehaviour
             {
                 GridObject gridObject = gridCellArray[x, y].gridObject;
 
-                if (gridObject is BaseBullet)
-                {
-                    message = message + " " + "X";
-                }
-                else if (gridObject is BaseBlob)
+                if (gridObject is BaseBlob)
                 {
                     //Debug.Log(((ColoredBlob)gridObject).GetComponentInChildren<Renderer>().material.name);
                     if (gridObject is ColoredBlob)

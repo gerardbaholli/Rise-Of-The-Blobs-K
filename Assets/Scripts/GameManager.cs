@@ -116,13 +116,7 @@ public class GameManager : MonoRegistrable
 
     private void BulletManager_OnBulletSpawned(object sender, BaseBullet bullet)
     {
-        bullet.OnCollisionStart += Bullet_OnCollisionStart;
         bullet.OnCollisionEnd += Bullet_OnCollisionEnd;
-    }
-
-    private void Bullet_OnCollisionStart(object sender, EventArgs e)
-    {
-        gameState = GameState.Paused;
     }
 
     private void Bullet_OnCollisionEnd(object sender, EventArgs e)

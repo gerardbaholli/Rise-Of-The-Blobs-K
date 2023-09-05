@@ -31,6 +31,11 @@ public class GridCell
         return cellGameObject.transform.rotation;
     }
 
+    public bool IsFree()
+    {
+        return gridObject == null;
+    }
+
     public void SetAndMoveGridObject(GridObject gridObject)
     {
         if (this.gridObject != null)

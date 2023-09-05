@@ -28,7 +28,7 @@ public class BaseBullet : MonoBehaviour
 
     protected void GameManager_OnActiveColumnChanged(object sender, EventArgs e)
     {
-        Debug.Log("GameManager_OnActiveColumnChanged");
+        //Debug.Log("GameManager_OnActiveColumnChanged");
 
         Transform prevActiveColumn = currentActiveColumn;
         currentActiveColumn = gameManager.GetActiveColumnTransform();
@@ -37,7 +37,7 @@ public class BaseBullet : MonoBehaviour
         float dotProductVectorMovement = GetVectorDotProductFromCameraView(vectorMovement);
 
         GridCell nearestGridCell = gridSystem.GetNearestGridCell(transform.position);
-        Debug.LogWarning(nearestGridCell);
+        //Debug.LogWarning(nearestGridCell);
 
         if (dotProductVectorMovement < 0)
         {
@@ -88,7 +88,7 @@ public class BaseBullet : MonoBehaviour
     protected void DestroyBullet()
     {
         gameManager.OnActiveColumnChanged -= GameManager_OnActiveColumnChanged;
-        Destroy(this);
+        Destroy(gameObject);
     }
 
 }

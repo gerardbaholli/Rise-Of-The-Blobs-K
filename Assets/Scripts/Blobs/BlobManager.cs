@@ -87,9 +87,8 @@ public class BlobManager : MonoRegistrable
         {
             for (int y = gridSystem.Height - 1; y > 0; y--)
             {
-                // If GridCell is null or if it is a Bullet: SKIP
-                if (gridCellArray[x, y - 1].gridObject == null ||
-                    gridCellArray[x, y - 1].gridObject is BaseBullet)
+                // If GridCell is null: SKIP
+                if (gridCellArray[x, y - 1].gridObject == null)
                     continue;
 
                 BaseBlob downBlob = gridCellArray[x, y - 1].gridObject as BaseBlob;

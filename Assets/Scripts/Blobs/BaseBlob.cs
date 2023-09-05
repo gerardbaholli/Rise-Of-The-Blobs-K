@@ -39,7 +39,7 @@ public class BaseBlob : GridObject
         currentGridCell = gridCell;
     }
 
-    public virtual void DestroyBlob()
+    public virtual void DestroyEffect()
     {
         Debug.LogError("DestroyEffect() not implemented");
     }
