@@ -330,7 +330,7 @@ MonoBehaviour:
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 0
---- !u!1 &1085177513
+--- !u!1 &1910208389
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -338,22 +338,22 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1085177514}
-  - component: {fileID: 1085177515}
+  - component: {fileID: 1910208390}
+  - component: {fileID: 1910208391}
   m_Layer: 0
-  m_Name: TestGridSystem
+  m_Name: Test
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &1085177514
+--- !u!4 &1910208390
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1085177513}
+  m_GameObject: {fileID: 1910208389}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -362,22 +362,33 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1085177515
+--- !u!114 &1910208391
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1085177513}
+  m_GameObject: {fileID: 1910208389}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 184169d597fccb445b32b534f8bfc9dd, type: 3}
+  m_Script: {fileID: 11500000, guid: 7183d1d1c5b23d84da261eff6dd2eb90, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  coloredMaterialListSO: {fileID: 11400000, guid: 373dbbc7527f3cd4887127a0960f2ff8,
+    type: 2}
+  coloredBulletPrefab: {fileID: -6694136156374280212, guid: 4bacb0c72a2bda6439f4977a00479bb8,
+    type: 3}
+  coloredBlobPrefab: {fileID: -3286674544657686275, guid: 3188e22366958e44c96315e48fa2920d,
+    type: 3}
+  testBlobPrefab: {fileID: 6121402476722413430, guid: 41a7e2dd0acc833499931dc8ade3c161,
+    type: 3}
+  testBulletPrefab: {fileID: 8876284643197658063, guid: a50e75dfff02e0540b91e70eb94fcc10,
+    type: 3}
+  testMaterial: {fileID: 2100000, guid: 7aeec99a8bac16947b7d616ec00814d2, type: 2}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 351673527}
   - {fileID: 1079020432}
-  - {fileID: 1085177514}
+  - {fileID: 1910208390}

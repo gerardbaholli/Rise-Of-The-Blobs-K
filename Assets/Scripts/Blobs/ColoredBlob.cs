@@ -9,21 +9,30 @@ public class ColoredBlob : BaseBlob
 
     private bool hasToBeDestroyed = false;
 
-    protected override void Start() // TODO: modificare
+    protected override void Start()
     {
         base.Start();
-        int randomIndex = Random.Range(0, coloredMaterialListSO.coloredMaterialList.Count);
-        SetColorMaterial(coloredMaterialListSO.coloredMaterialList[randomIndex]);
+    }
+
+    public override void StartingEffect()
+    {
+        SetRandomColorMaterial();
     }
 
     public Material GetColorMaterial()
     {
-        return blobVisual.GetComponent<MeshRenderer>().material;
+        return blobVisual.GetComponent<MeshRenderer>().sharedMaterial;
     }
 
     public void SetColorMaterial(Material blobColorMaterial)
     {
-        blobVisual.GetComponent<MeshRenderer>().material = blobColorMaterial;
+        blobVisual.GetComponent<MeshRenderer>().sharedMaterial = blobColorMaterial;
+    }
+
+    public void SetRandomColorMaterial()
+    {
+        int randomIndex = Random.Range(0, coloredMaterialListSO.coloredMaterialList.Count);
+        SetColorMaterial(coloredMaterialListSO.coloredMaterialList[randomIndex]);
     }
 
     public string PrintColor()

@@ -15,7 +15,7 @@ public class GameManager : MonoRegistrable
 
     private Transform activeColumnTransform;
 
-    private float stepTimerMax = 0.25f;
+    private float stepTimerMax = 0.1f;
     private float stepTimer;
 
     private float updateActiveColumnTimerMax = 0.1f;
@@ -69,7 +69,6 @@ public class GameManager : MonoRegistrable
         {
             stepTimer = 0f;
 
-            //Debug.Log("OnNextStep");
             OnNextStep?.Invoke(this, EventArgs.Empty);
         }
     }

@@ -20,16 +20,18 @@ public class BaseBullet : MonoBehaviour
     {
         gridSystem = ServiceLocator.Get<GridSystem>();
         gameManager = ServiceLocator.Get<GameManager>();
-
+        
         gameManager.OnActiveColumnChanged += GameManager_OnActiveColumnChanged;
-
         currentActiveColumn = gameManager.GetActiveColumnTransform();
+    }
+
+    public virtual void StartingEffect()
+    {
+        Debug.LogError("StartingEffect not implemented!");
     }
 
     protected void GameManager_OnActiveColumnChanged(object sender, EventArgs e)
     {
-        //Debug.Log("GameManager_OnActiveColumnChanged");
-
         Transform prevActiveColumn = currentActiveColumn;
         currentActiveColumn = gameManager.GetActiveColumnTransform();
         Vector3 vectorMovement = (prevActiveColumn.position - currentActiveColumn.position);
@@ -37,7 +39,6 @@ public class BaseBullet : MonoBehaviour
         float dotProductVectorMovement = GetVectorDotProductFromCameraView(vectorMovement);
 
         GridCell nearestGridCell = gridSystem.GetNearestGridCell(transform.position);
-        //Debug.LogWarning(nearestGridCell);
 
         if (dotProductVectorMovement < 0)
         {
@@ -59,7 +60,6 @@ public class BaseBullet : MonoBehaviour
         }
 
         float distance = vectorMovement.magnitude;
-        //Debug.Log(distance);
 
         if (distance < 2.0f)
         {

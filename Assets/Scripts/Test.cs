@@ -1,76 +1,43 @@
 using UnityEngine;
-using Services;
-using System.Linq;
-using NUnit.Framework;
-using System.Collections.Generic;
 
 public class Test : MonoBehaviour
 {
 
-    private GridSystem gridSystem;
-    private GameManager gameManager;
+    [SerializeField] private ColoredMaterialListSO coloredMaterialListSO;
+    [SerializeField] private ColoredBullet coloredBulletPrefab;
+    [SerializeField] private ColoredBlob coloredBlobPrefab;
 
-    private GridCell[,] gridCellArray;
-    [SerializeField] private ColoredMaterialListSO coloredMaterialList;
+    [SerializeField] private TestBlob testBlobPrefab;
+    [SerializeField] private TestBullet testBulletPrefab;
+
+    [SerializeField] Material testMaterial;
 
     private void Start()
     {
-        gridSystem = ServiceLocator.Get<GridSystem>();
-        gameManager = ServiceLocator.Get<GameManager>();
+        ColoredBullet coloredBullet = Instantiate(coloredBulletPrefab);
+        ColoredBlob coloredBlob = Instantiate(coloredBlobPrefab);
+        TestBlob testBlob = Instantiate(testBlobPrefab);
+        TestBullet testBullet = Instantiate(testBulletPrefab);
 
-        gridCellArray = gridSystem.GetCellArray();
-        gameManager.OnNextStep += GameManager_OnNextStep;
+
+        //coloredBullet.SetColorMaterial(testMaterial);
+        //coloredBlob.SetColorMaterial(testMaterial);
+
+        //coloredBullet.SetColorMaterial(coloredMaterialListSO.coloredMaterialList[0]);
+        //coloredBlob.SetColorMaterial(coloredMaterialListSO.coloredMaterialList[0]);
+
+        coloredBullet.SetColorMaterial(coloredMaterialListSO.coloredMaterialList[2]);
+        coloredBullet.SetColorMaterial(coloredMaterialListSO.coloredMaterialList[1]);
+        testMaterial = coloredBullet.GetColorMaterial();
+        coloredBlob.SetColorMaterial(coloredMaterialListSO.coloredMaterialList[2]);
+        coloredBlob.SetColorMaterial(testMaterial);
+
+        //Debug.Log(testBlob.GetComponent<MeshRenderer>().sharedMaterial == testBullet.GetComponent<MeshRenderer>().sharedMaterial);
+        //Debug.Log(testBlob.GetComponent<MeshRenderer>().sharedMaterial + " " + testBullet.GetComponent<MeshRenderer>().sharedMaterial);
+
+        Debug.Log(coloredBullet.GetColorMaterial() + " " + coloredBlob.GetColorMaterial());
+        Debug.Log(coloredBullet.GetColorMaterial() == coloredBlob.GetColorMaterial());
+
     }
-
-    private void GameManager_OnNextStep(object sender, System.EventArgs e)
-    {
-        DebugMethod();
-    }
-
-    private void DebugMethod()
-    {
-        string message = "";
-
-        for (int y = 13 - 1; y >= 0; y--)
-        {
-            for (int x = 0; x < 20; x++)
-            {
-                GridObject gridObject = gridCellArray[x, y].gridObject;
-
-                if (gridObject is BaseBlob)
-                {
-                    //Debug.Log(((ColoredBlob)gridObject).GetComponentInChildren<Renderer>().material.name);
-                    if (gridObject is ColoredBlob)
-                    {
-                        if (((ColoredBlob)gridObject).GetColorMaterial() != null)
-                        {
-
-                            if (((ColoredBlob)gridObject).GetColorMaterial().Equals(coloredMaterialList.coloredMaterialList.ElementAt(0)))
-                            {
-                                message = message + " " + "Y";
-                            }
-                            else if (((ColoredBlob)gridObject).GetColorMaterial().Equals(coloredMaterialList.coloredMaterialList.ElementAt(1)))
-                            {
-                                message = message + " " + "O";
-                            }
-                            else if (((ColoredBlob)gridObject).GetColorMaterial().Equals(coloredMaterialList.coloredMaterialList.ElementAt(2)))
-                            {
-                                message = message + " " + "G";
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    message = message + " " + "N";
-                }
-
-            }
-            message += "\n";
-        }
-
-        Debug.Log(message);
-    }
-
 
 }

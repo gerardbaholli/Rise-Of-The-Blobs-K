@@ -64,6 +64,7 @@ public class BlobManager : MonoRegistrable
         {
             Transform gridCellParent = gridCellArray[x, 0].GetTransform();
             BaseBlob blob = Instantiate(GenerateRandomBlob(blobListSO.blobList), gridCellParent);
+            blob.StartingEffect();
 
             gridCellArray[x, 0].gridObject = blob;
             blob.SetCurrentGridCell(gridCellArray[x, 0]);

@@ -17,6 +17,11 @@ public class BaseBlob : GridObject
         blobManager.OnSpawnNewRow += BlobManager_OnSpawnNewRow;
     }
 
+    public virtual void StartingEffect()
+    {
+        Debug.LogError("BaseBlob --> StartingEffect not implemented!");
+    }
+
     private void BlobManager_OnSpawnNewRow(object sender, System.EventArgs e)
     {
 

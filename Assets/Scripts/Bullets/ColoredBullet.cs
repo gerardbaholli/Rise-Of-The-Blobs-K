@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 public class ColoredBullet : BaseBullet
@@ -9,19 +8,28 @@ public class ColoredBullet : BaseBullet
     protected override void Start()
     {
         base.Start();
-        int randomIndex = UnityEngine.Random.Range(0, coloredMaterialListSO.coloredMaterialList.Count);
+    }
+
+    public override void StartingEffect()
+    {
+        SetRandomColorMaterial();
+    }
+
+    public Material GetColorMaterial()
+    {
+        return bulletVisual.GetComponent<MeshRenderer>().sharedMaterial;
+    }
+
+    public void SetColorMaterial(Material colorMaterial)
+    {
+        bulletVisual.GetComponent<MeshRenderer>().sharedMaterial = colorMaterial;
+    }
+
+    public void SetRandomColorMaterial()
+    {
+        int randomIndex = Random.Range(0, coloredMaterialListSO.coloredMaterialList.Count);
         Material bulletColorMaterial = coloredMaterialListSO.coloredMaterialList[randomIndex];
         SetColorMaterial(bulletColorMaterial);
-    }
-
-    private void SetColorMaterial(Material colorMaterial)
-    {
-        bulletVisual.GetComponent<MeshRenderer>().material = colorMaterial;
-    }
-
-    private Material GetColorMaterial()
-    {
-        return bulletVisual.GetComponent<MeshRenderer>().material;
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -34,7 +42,7 @@ public class ColoredBullet : BaseBullet
             Material coloredBlobMaterial = collidedColoredBlob.GetColorMaterial();
             Material bulletColorMaterial = GetColorMaterial();
 
-            if (coloredBlobMaterial.mainTexture == bulletColorMaterial.mainTexture)
+            if (coloredBlobMaterial == bulletColorMaterial)
             {
                 // Remove from grid
                 gridSystem.RemoveGridObjectFromGridCell(collidedBlob);
@@ -49,8 +57,9 @@ public class ColoredBullet : BaseBullet
 
                 gridSystem.AddGridObjectToGridCell(newColoredBlob, lowerFreeGridCell);
                 newColoredBlob.SetColorMaterial(bulletColorMaterial);
-                newColoredBlob.GetColorMaterial().mainTexture = bulletColorMaterial.mainTexture;
             }
+
+
         }
 
         CollisionEnd();

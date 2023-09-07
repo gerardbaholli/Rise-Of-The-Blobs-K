@@ -43,19 +43,20 @@ public class BulletManager : MonoRegistrable
         int randomIndex = UnityEngine.Random.Range(0, bulletListSO.bulletList.Count);
         BaseBullet bulletToSpawn = bulletListSO.bulletList[randomIndex];
         BaseBullet bullet = Instantiate(bulletToSpawn, activeGridCell.GetTransform());
+        bullet.StartingEffect();
 
         int column = activeGridCell.X;
         int row = gridSystem.Height - 1;
         GridCell gridCell = gridCellArray[column, row];
 
-        bullet.OnCollisionStart += Bullet_OnCollisionStart;
+        bullet.OnCollisionStart += Bullet_OnCollisionStart; // ?
         bullet.OnCollisionEnd += Bullet_OnCollisionEnd;
         isBusy = true;
 
         OnBulletSpawned?.Invoke(this, bullet);
     }
 
-    private void Bullet_OnCollisionStart(object sender, EventArgs e)
+    private void Bullet_OnCollisionStart(object sender, EventArgs e) // ?
     {
         ((BaseBullet)sender).OnCollisionStart -= Bullet_OnCollisionStart;
     }
