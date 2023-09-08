@@ -1,19 +1,17 @@
-using DG.Tweening;
 using Services;
-using System.Collections;
+using System;
 using System.Collections.Generic;
-using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class GridSystem : MonoRegistrable
 {
 
-    [SerializeField] public int Width { get; private set; } = 20;
-    [SerializeField] public int Height { get; private set; } = 13;
+    public int Width { get; private set; } = 20;
+    public int Height { get; private set; } = 13;
 
-    private float range = 4f;
+    private const float RANGE = 4f;
 
     private GridCell[,] gridCellArray;
 
@@ -69,8 +67,8 @@ public class GridSystem : MonoRegistrable
     private Vector3 ComputePosition(float angle)
     {
         float radAngle = Mathf.Deg2Rad * angle;
-        float x = Vector3.zero.x + range * Mathf.Cos(radAngle);
-        float z = Vector3.zero.z + range * Mathf.Sin(radAngle);
+        float x = Vector3.zero.x + RANGE * Mathf.Cos(radAngle);
+        float z = Vector3.zero.z + RANGE * Mathf.Sin(radAngle);
         return new Vector3(x, Vector3.zero.y, z);
     }
 
@@ -113,9 +111,6 @@ public class GridSystem : MonoRegistrable
                 tempX = x;
                 break;
             }
-
-            //if (x == Width - 1)
-            //Debug.LogWarning("NON HA TROVATO NULLA");
         }
 
         for (int y = 0; y < Height; y++)
@@ -130,8 +125,10 @@ public class GridSystem : MonoRegistrable
         return null;
     }
 
-    public void CompactGrid()
+    public async Task CompactGrid()
     {
+        List<Task> tasks = new List<Task>();
+
         for (int x = 0; x < Width; x++)
         {
             int count = 0;
@@ -149,43 +146,61 @@ public class GridSystem : MonoRegistrable
 
                 if (count > 0)
                 {
-                    // Se ci sono celle vuote sopra, sposta l'oggetto verso l'alto con interpolazione.
-                    BaseBlob blob = gridCellArray[x, y].gridObject as BaseBlob;
+                    GridObject blobGridObject = gridCellArray[x, y].gridObject;
+
+                    // Update gridCellArray
                     gridCellArray[x, y].gridObject = null;
-                    gridCellArray[x, y - count].gridObject = blob;
+                    gridCellArray[x, y - count].gridObject = blobGridObject;
 
-                    // blob.gameObject.transform.position = gridCellArray[x, y - count].GetPosition();
-                    // blob.gameObject.transform.rotation = gridCellArray[x, y - count].GetRotation(); // Possibly unnecessary
+                    // Update blob
+                    blobGridObject.SetCurrentGridCell(gridCellArray[x, y - count]);
+                    blobGridObject.gameObject.transform.parent = gridCellArray[x, y - count].GetTransform();
 
+                    // Move blob
                     Vector3 targetPosition = gridCellArray[x, y - count].GetPosition();
-                    StartCoroutine(MoveObjectAsync(blob.gameObject, targetPosition));
+                    tasks.Add(MoveObject(blobGridObject.gameObject, targetPosition));
+
 
                     y -= count;
                     count = 0;
                 }
-
             }
         }
+
+        Debug.Log("Inizio a compattare " + tasks.Count.ToString());
+        await Task.WhenAll(tasks);
+        Debug.Log("Ok ho finito");
+
     }
 
-    private IEnumerator MoveObjectAsync(GameObject obj, Vector3 targetPosition)
+    private async Task MoveObject(GameObject obj, Vector3 targetPosition)
     {
-        float journeyLength = Vector3.Distance(obj.transform.position, targetPosition);
-        float startTime = Time.time;
-        float distanceCovered = 0.0f;
-        float movingSpeed = 0.75f;
-
-        while (distanceCovered < journeyLength)
+        try
         {
-            float fractionOfJourney = distanceCovered / journeyLength;
-            obj.transform.position = Vector3.Lerp(obj.transform.position, targetPosition, fractionOfJourney);
+            float journeyLength = Vector3.Distance(obj.transform.position, targetPosition);
+            float startTime = Time.time;
+            float distanceCovered = 0.0f;
+            float movingSpeed = 1.0f;
 
-            distanceCovered = (Time.time - startTime) * movingSpeed;
+            while (distanceCovered < journeyLength)
+            {
+                float fractionOfJourney = distanceCovered / journeyLength;
+                Debug.Log(fractionOfJourney);
+                obj.transform.position = Vector3.Lerp(obj.transform.position, targetPosition, fractionOfJourney);
+                distanceCovered = (Time.time - startTime) * movingSpeed;
 
-            yield return null;
+                await Task.Yield();
+            }
+
+            Debug.Log("Okey");
+            obj.transform.position = targetPosition;
         }
+        catch (Exception ex)
+        {
 
-        obj.transform.position = targetPosition;
+            // Gestisci l'eccezione qui, ad esempio registrando l'errore, eseguendo azioni di ripristino o segnalando il problema.
+            Debug.LogError($"Errore durante il movimento dell'oggetto: {ex.Message} {ex.StackTrace}");
+        }
     }
 
     public GridCell GetUpGridCell(GridCell gridCell)
@@ -276,9 +291,9 @@ public class GridSystem : MonoRegistrable
     {
         GridCell gridObjectGridCell = gridObject.GetCurrentGridCell();
 
-        int c = gridObjectGridCell.X;
-        int r = gridObjectGridCell.Y;
-        gridCellArray[c, r].gridObject = null;
+        int x = gridObjectGridCell.X;
+        int y = gridObjectGridCell.Y;
+        gridCellArray[x, y].gridObject = null;
     }
 
     private int GetColumnIndex(Vector3 worldPosition)

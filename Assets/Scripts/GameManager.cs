@@ -15,7 +15,7 @@ public class GameManager : MonoRegistrable
 
     private Transform activeColumnTransform;
 
-    private float stepTimerMax = 0.1f;
+    [SerializeField] private float stepTimerMax = 1.0f;
     private float stepTimer;
 
     private float updateActiveColumnTimerMax = 0.1f;
@@ -28,7 +28,7 @@ public class GameManager : MonoRegistrable
         Paused
     }
 
-    private GameState gameState;
+    public GameState gameState; // private
 
 
     private void Awake()
@@ -113,20 +113,27 @@ public class GameManager : MonoRegistrable
         }
     }
 
-    private void BulletManager_OnBulletSpawned(object sender, BaseBullet bullet)
-    {
-        bullet.OnCollisionEnd += Bullet_OnCollisionEnd;
-    }
-
-    private void Bullet_OnCollisionEnd(object sender, EventArgs e)
-    {
-        gridSystem.CompactGrid();
-        gameState = GameState.Running;
-    }
-
     public Transform GetActiveColumnTransform()
     {
         return activeColumnTransform;
+    }
+
+    private void BulletManager_OnBulletSpawned(object sender, BaseBullet bullet)
+    {
+        bullet.OnCollisionStart += Bullet_OnCollisionStart;
+        bullet.OnCollisionEnd += Bullet_OnCollisionEnd;
+    }
+
+    private void Bullet_OnCollisionStart(object sender, EventArgs e)
+    {
+        gameState = GameState.Paused;
+        Debug.Log(gameState);
+    }
+
+    private async void Bullet_OnCollisionEnd(object sender, EventArgs e)
+    {
+        await gridSystem.CompactGrid();
+        gameState = GameState.Running;
     }
 
 }

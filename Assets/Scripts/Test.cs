@@ -1,43 +1,60 @@
 using UnityEngine;
+using Services;
 
 public class Test : MonoBehaviour
 {
-
     [SerializeField] private ColoredMaterialListSO coloredMaterialListSO;
-    [SerializeField] private ColoredBullet coloredBulletPrefab;
-    [SerializeField] private ColoredBlob coloredBlobPrefab;
 
-    [SerializeField] private TestBlob testBlobPrefab;
-    [SerializeField] private TestBullet testBulletPrefab;
+    private GridSystem gridSystem;
+    private GameManager gameManager;
 
-    [SerializeField] Material testMaterial;
+    private GridCell[,] gridCellArray;
 
     private void Start()
     {
-        ColoredBullet coloredBullet = Instantiate(coloredBulletPrefab);
-        ColoredBlob coloredBlob = Instantiate(coloredBlobPrefab);
-        TestBlob testBlob = Instantiate(testBlobPrefab);
-        TestBullet testBullet = Instantiate(testBulletPrefab);
+        gridSystem = ServiceLocator.Get<GridSystem>();
+        gameManager = ServiceLocator.Get<GameManager>();
 
-
-        //coloredBullet.SetColorMaterial(testMaterial);
-        //coloredBlob.SetColorMaterial(testMaterial);
-
-        //coloredBullet.SetColorMaterial(coloredMaterialListSO.coloredMaterialList[0]);
-        //coloredBlob.SetColorMaterial(coloredMaterialListSO.coloredMaterialList[0]);
-
-        coloredBullet.SetColorMaterial(coloredMaterialListSO.coloredMaterialList[2]);
-        coloredBullet.SetColorMaterial(coloredMaterialListSO.coloredMaterialList[1]);
-        testMaterial = coloredBullet.GetColorMaterial();
-        coloredBlob.SetColorMaterial(coloredMaterialListSO.coloredMaterialList[2]);
-        coloredBlob.SetColorMaterial(testMaterial);
-
-        //Debug.Log(testBlob.GetComponent<MeshRenderer>().sharedMaterial == testBullet.GetComponent<MeshRenderer>().sharedMaterial);
-        //Debug.Log(testBlob.GetComponent<MeshRenderer>().sharedMaterial + " " + testBullet.GetComponent<MeshRenderer>().sharedMaterial);
-
-        Debug.Log(coloredBullet.GetColorMaterial() + " " + coloredBlob.GetColorMaterial());
-        Debug.Log(coloredBullet.GetColorMaterial() == coloredBlob.GetColorMaterial());
-
+        gridCellArray = gridSystem.GetCellArray();
+        gameManager.OnNextStep += GameManager_OnNextStep;
     }
+
+
+    private void GameManager_OnNextStep(object sender, System.EventArgs e)
+    {
+        DebugMethod();
+    }
+
+    private void DebugMethod()
+    {
+        string message = "";
+
+        for (int y = 13 - 1; y >= 0; y--)
+        {
+            for (int x = 0; x < 20; x++)
+            {
+                GridObject gridObject = gridCellArray[x, y].gridObject;
+
+                if (gridObject is ColoredBlob)
+                {
+                    if ((gridObject as ColoredBlob).GetColorMaterial() == coloredMaterialListSO.coloredMaterialList[0])
+                        message = message + " " + "Y";
+                    else if ((gridObject as ColoredBlob).GetColorMaterial() == coloredMaterialListSO.coloredMaterialList[1])
+                        message = message + " " + "O";
+                    else if ((gridObject as ColoredBlob).GetColorMaterial() == coloredMaterialListSO.coloredMaterialList[2])
+                        message = message + " " + "G";
+                }
+                else
+                {
+                    message = message + " " + "N";
+                }
+
+            }
+            message += "\n";
+        }
+
+        Debug.Log(message);
+    }
+
 
 }

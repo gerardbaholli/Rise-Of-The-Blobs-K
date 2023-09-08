@@ -13,30 +13,11 @@ public class BaseBlob : GridObject
     {
         gridSystem = ServiceLocator.Get<GridSystem>();
         blobManager = ServiceLocator.Get<BlobManager>();
-
-        blobManager.OnSpawnNewRow += BlobManager_OnSpawnNewRow;
     }
 
     public virtual void StartingEffect()
     {
         Debug.LogError("BaseBlob --> StartingEffect not implemented!");
-    }
-
-    private void BlobManager_OnSpawnNewRow(object sender, System.EventArgs e)
-    {
-
-        //GridCell upGridCell = gridSystem.GetUpGridCell(currentGridCell);
-
-        //if (gridSystem.IsFree(upGridCell))
-        //{
-        //    gridSystem.MoveObjectToGridCell(upGridCell, this);
-        //}
-
-        //if (upGridCell?.gridObject is BaseBullet)
-        //{
-        //    this.CollideWithBullet(upGridCell);
-        //    return;
-        //}
     }
 
     public void SetGridCell(GridCell gridCell)

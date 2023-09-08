@@ -76,9 +76,9 @@ public class BaseBullet : MonoBehaviour
         return dotProduct; // < 0 (left); < 0 (right);
     }
 
-    public virtual void CollisionEffect(BaseBlob collidedBlob)
+    protected virtual void CollisionEffect(Collision collision)
     {
-        Debug.LogError("CollisionEffect not implemented!");
+        CollisionStart();
     }
 
     protected void CollisionStart() => OnCollisionStart?.Invoke(this, EventArgs.Empty);

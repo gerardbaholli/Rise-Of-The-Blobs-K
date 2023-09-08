@@ -34,6 +34,13 @@ public class ColoredBullet : BaseBullet
 
     private void OnCollisionEnter(Collision collision)
     {
+        CollisionEffect(collision);
+    }
+
+    protected override void CollisionEffect(Collision collision)
+    {
+        base.CollisionEffect(collision);
+
         BaseBlob collidedBlob = collision.gameObject.GetComponent<BaseBlob>();
 
         if (collidedBlob is ColoredBlob)
@@ -45,7 +52,9 @@ public class ColoredBullet : BaseBullet
             if (coloredBlobMaterial == bulletColorMaterial)
             {
                 // Remove from grid
-                gridSystem.RemoveGridObjectFromGridCell(collidedBlob);
+                gridSystem.RemoveGridObjectFromGridCell(collidedColoredBlob);
+                Debug.Log("Bullet color material: " + bulletColorMaterial.name);
+                Debug.Log("Removing: " + collidedColoredBlob.ToString());
 
                 collidedColoredBlob.DestroyEffect();
             }

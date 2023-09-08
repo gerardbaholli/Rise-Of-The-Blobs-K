@@ -35,24 +35,6 @@ public class ColoredBlob : BaseBlob
         SetColorMaterial(coloredMaterialListSO.coloredMaterialList[randomIndex]);
     }
 
-    public string PrintColor()
-    {
-        if (GetColorMaterial() == coloredMaterialListSO.coloredMaterialList[2])
-        {
-            return "G";
-        }
-        else if (GetColorMaterial() == coloredMaterialListSO.coloredMaterialList[1])
-        {
-            return "O";
-        }
-        else if (GetColorMaterial() == coloredMaterialListSO.coloredMaterialList[0])
-        {
-            return "Y";
-        }
-
-        return "-";
-    }
-
     public override void DestroyEffect()
     {
         if (!hasToBeDestroyed)
@@ -87,11 +69,16 @@ public class ColoredBlob : BaseBlob
         {
             ColoredBlob coloredBlob = gridCell.gridObject as ColoredBlob;
 
-            if (GetColorMaterial().mainTexture == coloredBlob.GetColorMaterial().mainTexture)
+            if (GetColorMaterial() == coloredBlob.GetColorMaterial())
             {
                 coloredBlob.DestroyEffect();
             }
         }
+    }
+
+    public override string ToString()
+    {
+        return $"x: {currentGridCell.X} @ y: {currentGridCell.Y} @ color: {GetColorMaterial().name}";
     }
 
 }
