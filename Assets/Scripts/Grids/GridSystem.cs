@@ -2,7 +2,7 @@ using Services;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using TMPro;
+using DG.Tweening;
 using UnityEngine;
 
 public class GridSystem : MonoRegistrable
@@ -167,10 +167,9 @@ public class GridSystem : MonoRegistrable
             }
         }
 
-        Debug.Log("Inizio a compattare " + tasks.Count.ToString());
+        //Debug.Log("Inizio a compattare " + tasks.Count.ToString());
         await Task.WhenAll(tasks);
-        Debug.Log("Ok ho finito");
-
+        //Debug.Log("Ok ho finito");
     }
 
     private async Task MoveObject(GameObject obj, Vector3 targetPosition)
@@ -178,27 +177,12 @@ public class GridSystem : MonoRegistrable
         try
         {
             float journeyLength = Vector3.Distance(obj.transform.position, targetPosition);
-            float startTime = Time.time;
-            float distanceCovered = 0.0f;
-            float movingSpeed = 1.0f;
+            float movementDuration = 0.25f; // Durata del movimento (puoi personalizzarla)
 
-            while (distanceCovered < journeyLength)
-            {
-                float fractionOfJourney = distanceCovered / journeyLength;
-                Debug.Log(fractionOfJourney);
-                obj.transform.position = Vector3.Lerp(obj.transform.position, targetPosition, fractionOfJourney);
-                distanceCovered = (Time.time - startTime) * movingSpeed;
-
-                await Task.Yield();
-            }
-
-            Debug.Log("Okey");
-            obj.transform.position = targetPosition;
+            await obj.transform.DOMove(targetPosition, movementDuration).SetEase(Ease.InOutBounce).AsyncWaitForCompletion();
         }
         catch (Exception ex)
         {
-
-            // Gestisci l'eccezione qui, ad esempio registrando l'errore, eseguendo azioni di ripristino o segnalando il problema.
             Debug.LogError($"Errore durante il movimento dell'oggetto: {ex.Message} {ex.StackTrace}");
         }
     }

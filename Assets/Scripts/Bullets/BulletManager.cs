@@ -12,22 +12,30 @@ public class BulletManager : MonoRegistrable
     private GridSystem gridSystem;
     private GameManager gameManager;
 
-    private bool isBusy = false;
+    private bool isBulletRunning = false;
+    //private bool isGamePaused = false;
 
     private void Awake()
     {
         ServiceLocator.Register(this);
     }
-     
+
     private void Start()
     {
         gridSystem = ServiceLocator.Get<GridSystem>();
         gameManager = ServiceLocator.Get<GameManager>();
+
+        //gameManager.OnGameStateChanged += GameManager_OnGameStateChanged;
     }
+
+    //private void GameManager_OnGameStateChanged(object sender, EventArgs e)
+    //{
+    //    isGamePaused = (gameManager.GetGameState() == GameManager.GameState.Paused);
+    //}
 
     private void LateUpdate()
     {
-        if (Input.GetKeyDown(KeyCode.Space) && !isBusy)
+        if (Input.GetKeyDown(KeyCode.Space) && !isBulletRunning)
         {
             ShootBullet();
         }
@@ -51,7 +59,7 @@ public class BulletManager : MonoRegistrable
 
         bullet.OnCollisionStart += Bullet_OnCollisionStart; // ?
         bullet.OnCollisionEnd += Bullet_OnCollisionEnd;
-        isBusy = true;
+        isBulletRunning = true;
 
         OnBulletSpawned?.Invoke(this, bullet);
     }
@@ -63,7 +71,7 @@ public class BulletManager : MonoRegistrable
 
     private void Bullet_OnCollisionEnd(object sender, EventArgs e)
     {
-        isBusy = false;
+        isBulletRunning = false;
         ((BaseBullet)sender).OnCollisionEnd -= Bullet_OnCollisionEnd;
     }
 }

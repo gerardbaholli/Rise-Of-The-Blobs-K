@@ -53,8 +53,8 @@ public class ColoredBullet : BaseBullet
             {
                 // Remove from grid
                 gridSystem.RemoveGridObjectFromGridCell(collidedColoredBlob);
-                Debug.Log("Bullet color material: " + bulletColorMaterial.name);
-                Debug.Log("Removing: " + collidedColoredBlob.ToString());
+                //Debug.Log("Bullet color material: " + bulletColorMaterial.name);
+                //Debug.Log("Removing: " + collidedColoredBlob.ToString());
 
                 collidedColoredBlob.DestroyEffect();
             }

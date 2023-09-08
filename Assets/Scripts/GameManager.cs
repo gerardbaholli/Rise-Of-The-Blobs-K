@@ -7,6 +7,7 @@ public class GameManager : MonoRegistrable
 {
     public event EventHandler OnNextStep;
     public event EventHandler OnActiveColumnChanged;
+    //public event EventHandler OnGameStateChanged;
 
     private GridSystem gridSystem;
     private BulletManager bulletManager;
@@ -28,7 +29,7 @@ public class GameManager : MonoRegistrable
         Paused
     }
 
-    public GameState gameState; // private
+    private GameState gameState;
 
 
     private void Awake()
@@ -127,13 +128,14 @@ public class GameManager : MonoRegistrable
     private void Bullet_OnCollisionStart(object sender, EventArgs e)
     {
         gameState = GameState.Paused;
-        Debug.Log(gameState);
+        //OnGameStateChanged?.Invoke(this, EventArgs.Empty);
     }
 
     private async void Bullet_OnCollisionEnd(object sender, EventArgs e)
     {
         await gridSystem.CompactGrid();
         gameState = GameState.Running;
+        //OnGameStateChanged?.Invoke(this, EventArgs.Empty);
     }
 
 }
