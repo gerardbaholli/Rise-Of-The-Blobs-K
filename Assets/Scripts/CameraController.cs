@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
-    [SerializeField] private float rotationSpeed = 150f;
+    [SerializeField] private float rotationSpeed = 120f;
     [SerializeField] private GameObject tower;
 
     private void Update()
